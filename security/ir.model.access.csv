@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_freeswitch_cti_cti_command,access_freeswitch_cti_cti_command,model_freeswitch_cti_cti_command,base.group_user,1,1,1,1

@@ -1,0 +1,43 @@
+<odoo>
+  <data>
+
+    <!-- Views -->
+    <record id="freeswitch_cti_command_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.cti_command.view.tree</field>
+      <field name="model">freeswitch_cti.cti_command</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="parameter"/>
+          <field name="status"/>
+          <field name="result"/>
+          <field name="execute_time"/>
+          <field name="confirm_time"/>          
+        </tree>
+      </field>
+    </record>
+
+    <record id="open_view_cti_command_list" model="ir.actions.act_window">
+      <field name="name">CTI Commands</field>
+      <field name="res_model">freeswitch_cti.cti_command</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menus -->
+    <!-- <menuitem -->
+    <!--     id="menu_freeswitch_xml_curl_root" -->
+    <!--     name="Freeswitch" -->
+    <!--     web_icon="freeswitch_xml_curl/static/description/icon.png" -->
+    <!--     sequence="75"/> -->
+    
+    <menuitem
+        id="menu_all_cti_commands"
+        name="CTI Commands"
+        parent="odoo_freeswitch_xml_curl.menu_freeswitch_xml_curl_root"
+        action="open_view_cti_command_list"
+        sequence="0"/>
+    
+  </data>
+
+</odoo>
+
