@@ -17,9 +17,32 @@
       </field>
     </record>
 
+    <record id="freeswitch_cti_event_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.cti_event.view.tree</field>
+      <field name="model">freeswitch_cti.cti_event</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="freeswitch"/>
+          <field name="name"/>
+          <field name="command_name"/>
+          <field name="content_type"/>
+          <field name="content_length"/>
+          <field name="content_content"/>
+          <field name="event_content"/>
+          <field name="create_date"/>          
+        </tree>
+      </field>
+    </record>
+
     <record id="open_view_cti_command_list" model="ir.actions.act_window">
       <field name="name">CTI Commands</field>
       <field name="res_model">freeswitch_cti.cti_command</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="open_view_cti_event_list" model="ir.actions.act_window">
+      <field name="name">CTI Events</field>
+      <field name="res_model">freeswitch_cti.cti_event</field>
       <field name="view_mode">tree,form</field>
     </record>
 
@@ -36,7 +59,14 @@
         parent="odoo_freeswitch_xml_curl.menu_freeswitch_xml_curl_root"
         action="open_view_cti_command_list"
         sequence="0"/>
-    
+
+    <menuitem
+        id="menu_all_cti_events"
+        name="CTI Commands"
+        parent="odoo_freeswitch_xml_curl.menu_freeswitch_xml_curl_root"
+        action="open_view_cti_event_list"
+        sequence="0"/>
+
   </data>
 
 </odoo>

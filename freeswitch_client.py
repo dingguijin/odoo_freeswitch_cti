@@ -5,8 +5,10 @@
 # All rights reserved.
 #
 
+import aiohttp
 import asyncio
 import collections
+import json
 import logging
 import time
 import threading
@@ -93,8 +95,10 @@ class FreeSwitchClient():
                 if self._is_meta_headers(_headers):
                     continue
 
-                _logger.info("CTIClient ..... HEADERS %s", _headers)                           
+                _logger.info("CTIClient ..... HEADERS %s", _headers)
                 await self._handle_headers(_headers)
+                self._log_event(_headers)
+                await self._push_event(_headers)
                 _headers = {}
 
             if self.client_status == "SUBSCRIBED":
@@ -302,5 +306,33 @@ class FreeSwitchClient():
             WHERE id=%d
             """ % self.freeswitch_info["id"])
             cr.commit()
+        return
+        
+    def _log_event(self, headers):
+        with self.db_connection.cursor() as cr:
+            _r = cr.execute("""
+            INSERT into freeswitch_cti_cti_event
+            (name, freeswitch, content_type, content_length, content_content, event_content, command_name) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
+            """, (headers.get("Event-Name") or "",
+                  self.freeswitch_info["id"],
+                  headers.get("Content-Type") or "",
+                  headers.get("Content-Length") or 0,
+                  headers.get("Content-Content") or "",
+                  json.dumps(headers),
+                  headers.get("Command") or ""))
+            #cr.execute(_sql)
+            _r = cr.fetchone()
+            #_logger.info("cr.execte %s" % _sql);
+            # _logger.info("cr.execte r %s" % _r);
+            headers.update({"cti_event_id": _r})
+        return
+
+    async def _push_event(self, headers):
+        async with aiohttp.ClientSession() as session:
+            _event_url = "http://localhost:8069/web/cti_event/%d" % headers.get("cti_event_id")
+            async with session.get(_event_url) as resp:
+                _r = await resp.json()
+                _logger.info("push cti_event: %s" % _r)
         return
         
