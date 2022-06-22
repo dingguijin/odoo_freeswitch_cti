@@ -19,5 +19,8 @@ class CtiEvent(models.Model):
 
     # if backgroup_job
     command_name = fields.Char("Command Name", required=False)
-    
+    command_id = fields.Integer("Command ID", required=False)
+
+    # if register/unregister/dialing/hangup/offhook
+    sip_number = fields.Char("Sip Number", required=False)
     

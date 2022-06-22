@@ -62,7 +62,7 @@
 
     <menuitem
         id="menu_all_cti_events"
-        name="CTI Commands"
+        name="CTI Events"
         parent="odoo_freeswitch_xml_curl.menu_freeswitch_xml_curl_root"
         action="open_view_cti_event_list"
         sequence="0"/>
