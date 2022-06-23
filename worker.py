@@ -105,21 +105,14 @@ class CTICommandThread(threading.Thread):
         self.cti_client = freeswitch_client.FreeSwitchClient(self.dbname)
 
     def run(self):
-        _logger.info("CTICommandThread run.")
-
+        _logger.info("CTICommandThread start.")
         while True:
             if self.is_stop:
                 self.cti_client.stop()
                 break
-
             asyncio.run(self.cti_client.run_loop())
-
-            _logger.info("IN CTICOMMANDTHREAD")
-            time.sleep(1)
-
-    def dispatch_cti_commands(self, commands):
-        return
-
+            #_logger.info("IN CTICOMMANDTHREAD")
+            time.sleep(3)
 
 class CTINotificationThread(threading.Thread):
     """

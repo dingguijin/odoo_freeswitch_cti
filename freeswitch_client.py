@@ -55,10 +55,16 @@ class FreeSwitchClient():
         self.db_connection = odoo.sql_db.db_connect(self.dbname)
         _freeswitch = self._get_freeswitch_info(self.db_connection)
         if not _freeswitch:
+            _logger.error("No predefined freeswitch, exit CTI.")
             return
         
         self.freeswitch_info = _freeswitch
-        self.reader, self.writer = await asyncio.open_connection(_freeswitch["freeswitch_ip"], 8021)
+        try:
+            self.reader, self.writer = await asyncio.open_connection(_freeswitch["freeswitch_ip"], 8021)
+        except:
+            _logger.error("Can not connect freeswitch: [%s], auto restarting." % _freeswitch["freeswitch_ip"])
+            return
+        
         _headers = {}
         while True:
 
@@ -69,7 +75,7 @@ class FreeSwitchClient():
             try:
                 _header = await asyncio.wait_for(self.reader.readline(), timeout=3.0)
             except asyncio.TimeoutError:
-                _logger.info(">>>>>>>>> No event to read, continue")
+                #_logger.info(">>>>>>>>> No event to read, continue")
                 if self.client_status == "SUBSCRIBED":
                     self._dispatch_cti_commands()
                 continue
@@ -95,7 +101,7 @@ class FreeSwitchClient():
                 if self._is_meta_headers(_headers):
                     continue
 
-                _logger.info("CTIClient ..... HEADERS %s", _headers)
+                #_logger.info("CTIClient ..... HEADERS %s", _headers)
                 await self._handle_headers(_headers)
                 self._log_event(_headers)
                 await self._push_event(_headers)
@@ -186,12 +192,10 @@ class FreeSwitchClient():
         return
 
     def _handle_event_func_HEARTBEAT(self, headers):
-        _logger.info("HEATBEAT -----------------------> %s" % headers)
         self._update_freeswitch_info_last_seen()
         return
     
     def _handle_event_func_BACKGROUND_JOB(self, headers):
-        _logger.info("BACKGROUND_JOB -----------------------> %s" % headers)
         _job_uuid = headers.get("Job-UUID")
         _command = self.jobs.get(_job_uuid)
         if not _command:
@@ -206,11 +210,11 @@ class FreeSwitchClient():
         return
 
     def _handle_event_func_API(self, headers):
-        _logger.info("API -----------------------> %s" % headers)
         return
 
     def _send_bgapi_command(self, command, record_id):
-        self.bgapi_commands.append({"cti_command": command, "cti_command_id": record_id})
+        self.bgapi_commands.append({"cti_command": command,
+                                    "cti_command_id": record_id})
         _cmd = "bgapi %s" % command
         self._send_cmd(_cmd)
         return
@@ -321,10 +325,7 @@ class FreeSwitchClient():
                   headers.get("Content-Content") or "",
                   json.dumps(headers),
                   headers.get("Command") or ""))
-            #cr.execute(_sql)
             _r = cr.fetchone()
-            #_logger.info("cr.execte %s" % _sql);
-            # _logger.info("cr.execte r %s" % _r);
             headers.update({"cti_event_id": _r})
         return
 
@@ -333,6 +334,6 @@ class FreeSwitchClient():
             _event_url = "http://localhost:8069/web/cti_event/%d" % headers.get("cti_event_id")
             async with session.get(_event_url) as resp:
                 _r = await resp.json()
-                _logger.info("push cti_event: %s" % _r)
+                #_logger.info("push cti_event: %s" % _r)
         return
         

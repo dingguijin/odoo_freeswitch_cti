@@ -15,5 +15,5 @@ class Main(http.Controller):
 
     @http.route('/web/cti_event/<int:event>', type='http', auth="none", methods=['GET'])
     def cti_event(self, event):
-        _logger.info(">?????????????< controller event: %d" % event)
+        #_logger.info(">?????????????< controller event: %d" % event)
         return http.request.make_response(json.dumps({"result": "OK"}), [('Content-Type', 'application/json')])
