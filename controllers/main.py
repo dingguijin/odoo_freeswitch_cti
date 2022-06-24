@@ -15,5 +15,11 @@ class Main(http.Controller):
 
     @http.route('/web/cti_event/<int:event>', type='http', auth="none", methods=['GET'])
     def cti_event(self, event):
-        #_logger.info(">?????????????< controller event: %d" % event)
+        _event = http.request.env['freeswitch_cti.cti_event'].sudo().browse(event)
+        http.request.env['bus.bus']._sendone("agent_update", "agent_update",
+                                             {
+                                                 "event_id": event,
+                                                 "event_name": _event.name,
+                                                 "event_subclass": _event.subclass
+                                             })
         return http.request.make_response(json.dumps({"result": "OK"}), [('Content-Type', 'application/json')])

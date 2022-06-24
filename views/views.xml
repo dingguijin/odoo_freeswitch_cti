@@ -24,6 +24,7 @@
         <tree>
           <field name="freeswitch"/>
           <field name="name"/>
+          <field name="subclass"/>
           <field name="command_name"/>
           <field name="content_type"/>
           <field name="content_length"/>

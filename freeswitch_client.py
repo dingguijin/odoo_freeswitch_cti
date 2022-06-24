@@ -101,7 +101,7 @@ class FreeSwitchClient():
                 if self._is_meta_headers(_headers):
                     continue
 
-                #_logger.info("CTIClient ..... HEADERS %s", _headers)
+                #_logger.info("HEADERS %s", _headers)
                 await self._handle_headers(_headers)
                 self._log_event(_headers)
                 await self._push_event(_headers)
@@ -191,17 +191,80 @@ class FreeSwitchClient():
 
         return
 
+    def _handle_event_func_CHANNEL_CREATE(self, headers):
+        #self._update_user_channel_map(headers)
+        #"Call-Direction"
+        #"Caller-Username"
+        #"Caller-Caller-ID-Number"
+        #"Unique-ID"
+        # "Caller-Destination-Number
+        _logger.info(headers)
+        return
+
+    def _handle_event_func_CHANNEL_STATE(self, headers):
+        #self._update_user_channel_map(headers)
+        #"Call-Direction"
+        #"Caller-Username"
+        #"Caller-Caller-ID-Number"
+        #"Unique-ID"
+        # "Caller-Destination-Number
+        _logger.info(headers)
+        return
+
+    def _handle_event_func_CHANNEL_CALLSTATE(self, headers):
+        #self._update_user_channel_map(headers)
+        #"Call-Direction"
+        #"Caller-Username"
+        #"Caller-Caller-ID-Number"
+        #"Unique-ID"
+        # "Caller-Destination-Number
+        _logger.info(headers)
+        return
+
+    def _handle_event_func_CHANNEL_EXECUTE(self, headers):
+        #self._update_user_channel_map(headers)
+        #"Call-Direction"
+        #"Caller-Username"
+        #"Caller-Caller-ID-Number"
+        #"Unique-ID"
+        # "Caller-Destination-Number
+        _logger.info(headers)
+        return
+
+    def _handle_event_func_CHANNEL_EXECUTE_COMPLETE(self, headers):
+        #self._update_user_channel_map(headers)
+        #"Call-Direction"
+        #"Caller-Username"
+        #"Caller-Caller-ID-Number"
+        #"Unique-ID"
+        # "Caller-Destination-Number
+        _logger.info(headers)
+        return
+
     def _handle_event_func_HEARTBEAT(self, headers):
         self._update_freeswitch_info_last_seen()
+        return
+
+    def _handle_event_func_CUSTOM(self, headers):
+        _subclass = headers.get("Event-Subclass")
+        if _subclass == "sofia::register_attempt":
+            return
+        if _subclass == "sofia::register":
+            self._update_sip_register_status(headers)
+            return
+        return
+
+    def _handle_event_func_PRESENCE_IN(self, headers):
+        self._update_sip_phone_presence(headers)
         return
     
     def _handle_event_func_BACKGROUND_JOB(self, headers):
         _job_uuid = headers.get("Job-UUID")
         _command = self.jobs.get(_job_uuid)
         if not _command:
-            logging.error("No job for uuid: [%s]" % _job_uuid)
-            return
-        
+            _logger.error("No job for uuid: [%s]" % _job_uuid)
+            #_logger.info(headers)
+            return    
         _content_content = headers.get("Content-Content") or ""
         self._update_cti_command_status(_command["cti_command_id"],
                                         "CONFIRM",
@@ -313,23 +376,32 @@ class FreeSwitchClient():
         return
         
     def _log_event(self, headers):
+        _do_not_log = ["RE_SCHEDULE", "HEARTBEAT"]
+        if headers.get("Event-Name") in _do_not_log:
+            return
+
         with self.db_connection.cursor() as cr:
             _r = cr.execute("""
             INSERT into freeswitch_cti_cti_event
-            (name, freeswitch, content_type, content_length, content_content, event_content, command_name) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
+            (name, freeswitch, content_type, content_length, content_content, event_content, subclass, command_name, create_date) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, now()) RETURNING id;
             """, (headers.get("Event-Name") or "",
                   self.freeswitch_info["id"],
                   headers.get("Content-Type") or "",
                   headers.get("Content-Length") or 0,
                   headers.get("Content-Content") or "",
                   json.dumps(headers),
-                  headers.get("Command") or ""))
+                  headers.get("Event-Subclass") or "",
+                  headers.get("Job-Command") or ""))
             _r = cr.fetchone()
             headers.update({"cti_event_id": _r})
         return
 
     async def _push_event(self, headers):
+        _do_not_push = ["RE_SCHEDULE", "HEARTBEAT"]
+        if headers.get("Event-Name") in _do_not_push:
+            return
+        
         async with aiohttp.ClientSession() as session:
             _event_url = "http://localhost:8069/web/cti_event/%d" % headers.get("cti_event_id")
             async with session.get(_event_url) as resp:
@@ -337,3 +409,44 @@ class FreeSwitchClient():
                 #_logger.info("push cti_event: %s" % _r)
         return
         
+
+    def _update_sip_register_status(self, headers):
+        _status = headers.get("status") or ""# Registered(UDP)
+        _user_agent = headers.get("user-agent") or ""
+        _sip_auth_username = headers.get("sip_auth_username") or ""
+        _sip_auth_realm = headers.get("sip_auth_realm") or ""
+        _sip_phone_ip = headers.get("network-ip") or ""
+        if not _sip_auth_username:
+            return
+        with self.db_connection.cursor() as cr:
+            cr.execute("""
+            UPDATE res_users
+            set sip_register_status='%s',
+            sip_phone_user_agent='%s',
+            sip_phone_ip='%s',
+            sip_auth_realm='%s',
+            sip_phone_last_seen=now()
+            WHERE sip_number='%s'
+            """ % (_status, _user_agent, _sip_phone_ip,
+                   _sip_auth_realm, _sip_auth_username))
+            cr.commit()
+        return
+
+    def _update_sip_phone_presence(self, headers):
+        _from = headers.get("from") or ""
+        _event_type = headers.get("event_type") or ""
+        _user_agent = headers.get("user-agent") or ""
+
+        if not _from or not _event_type:
+            return
+        _sip_number = _from.split("@")[0]
+        with self.db_connection.cursor() as cr:
+            cr.execute("""
+            UPDATE res_users SET
+            sip_phone_status='%s',
+            sip_phone_last_seen=now()
+            WHERE sip_number='%s'
+            """ % (_event_type, _sip_number))
+            cr.commit()
+        return
+

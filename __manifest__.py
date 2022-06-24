@@ -9,7 +9,7 @@
     'description': """
         This module provides CTI connection with FreeSWITCH.
         """,
-    'depends': ['mail'],
+    'depends': ['mail', 'odoo_freeswitch_xml_curl'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

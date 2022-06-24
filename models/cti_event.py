@@ -9,7 +9,7 @@ class CtiEvent(models.Model):
     _description = "Cti Event"
 
     
-    name = fields.Char('Name', required=True)
+    name = fields.Char('Event Name', required=True)
     freeswitch = fields.Many2one('freeswitch_xml_curl.freeswitch', string='FreeSWITCH')
 
     content_type = fields.Char('Content Type', required=False)
@@ -23,4 +23,5 @@ class CtiEvent(models.Model):
 
     # if register/unregister/dialing/hangup/offhook
     sip_number = fields.Char("Sip Number", required=False)
-    
+
+    subclass = fields.Char("Event Subclass", required=False)
