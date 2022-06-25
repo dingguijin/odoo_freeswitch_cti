@@ -574,7 +574,7 @@ class FreeSwitchClient():
         _channel = self.channels[_uuid]
         if _channel["call_direction"] == "inbound":
             return _channel["caller_id"]
-        return _channel["caller_id"]
+        return _channel["called_id"]
 
     def _update_sip_phone_status(self, sip_number, status):
         with self.db_connection.cursor() as cr:
