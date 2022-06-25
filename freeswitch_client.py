@@ -31,6 +31,7 @@ class FreeSwitchClient():
         self.client_status = "NULL" # AUTH
         self.bgapi_commands = collections.deque([])
         self.jobs = {}
+        self.channels = {}
         return
 
     def stop(self):
@@ -180,7 +181,15 @@ class FreeSwitchClient():
         _event_name = headers.get("Event-Name")
         if not _event_name:
             return
-        
+
+        _logger.info("Event-Name: [%s], Unique-ID: [%s], Call-Direction: [%s], Channel-Call-UUID: [%s], Other-Leg-Unique-ID: [%s]" %
+                     (_event_name,
+                      headers.get("Unique-ID"),
+                      headers.get("Call-Direction"),
+                      headers.get("Channel-Call-UUID"),
+                      headers.get("Other-Leg-Unique-ID")
+                      ))
+
         _event_func_name = "_handle_event_func_%s" % _event_name.upper()
         if hasattr(self, _event_func_name):
             _event_func = getattr(self, _event_func_name)
@@ -192,13 +201,14 @@ class FreeSwitchClient():
         return
 
     def _handle_event_func_CHANNEL_CREATE(self, headers):
-        #self._update_user_channel_map(headers)
+        self._create_user_channel_map(headers)
+        self._update_sip_phone_channel_create(headers)
         #"Call-Direction"
         #"Caller-Username"
         #"Caller-Caller-ID-Number"
         #"Unique-ID"
         # "Caller-Destination-Number
-        _logger.info(headers)
+        #_logger.info(headers)
         return
 
     def _handle_event_func_CHANNEL_STATE(self, headers):
@@ -208,7 +218,7 @@ class FreeSwitchClient():
         #"Caller-Caller-ID-Number"
         #"Unique-ID"
         # "Caller-Destination-Number
-        _logger.info(headers)
+        #_logger.info(headers)
         return
 
     def _handle_event_func_CHANNEL_CALLSTATE(self, headers):
@@ -218,7 +228,7 @@ class FreeSwitchClient():
         #"Caller-Caller-ID-Number"
         #"Unique-ID"
         # "Caller-Destination-Number
-        _logger.info(headers)
+        #_logger.info(headers)
         return
 
     def _handle_event_func_CHANNEL_EXECUTE(self, headers):
@@ -228,7 +238,7 @@ class FreeSwitchClient():
         #"Caller-Caller-ID-Number"
         #"Unique-ID"
         # "Caller-Destination-Number
-        _logger.info(headers)
+        #_logger.info(headers)
         return
 
     def _handle_event_func_CHANNEL_EXECUTE_COMPLETE(self, headers):
@@ -238,7 +248,55 @@ class FreeSwitchClient():
         #"Caller-Caller-ID-Number"
         #"Unique-ID"
         # "Caller-Destination-Number
-        _logger.info(headers)
+        #_logger.info(headers)
+        return
+
+    def _handle_event_func_CHANNEL_DESTROY(self, headers):
+        # _uuid = headers.get("Unique-ID")
+        # _channel = self.channels.get(_uuid)
+        # if _channel:
+        #     _logger.info("MY CHANNEL: %s" % _channel)
+
+        #     _other_uuid = _channel.get("other_uuid")
+        #     if _other_uuid:
+        #         _other_channel = self.channels.get(_other_uuid)
+        #         _logger.info("OTHER CHANNEL: %s" % _other_channel)
+        return
+
+    def _handle_event_func_CHANNEL_HANGUP(self, headers):
+        self._update_sip_phone_hangup(headers)
+        self._remove_user_channel_map(headers)
+        return
+    
+    def _handle_event_func_CHANNEL_HANGUP_COMPLETE(self, headers):
+        return
+
+    def _handle_event_func_CODEC(self, headers):
+        return
+
+    def _handle_event_func_CHANNEL_PROGRESS_MEDIA(self, headers):
+        return
+
+    def _handle_event_func_CHANNEL_PROGRESS(self, headers):
+        return
+
+    def _handle_event_func_CHANNEL_ORIGINATE(self, headers):
+        return
+
+    def _handle_event_func_CHANNEL_OUTGOING(self, headers):
+        return
+    
+    def _handle_event_func_CHANNEL_ANSWER(self, headers):
+        self._update_sip_phone_answer(headers)
+        return
+
+    def _handle_event_func_CHANNEL_BRIDGE(self, headers):
+        return
+
+    def _handle_event_func_CHANNEL_UNBRIDGE(self, headers):
+        return
+
+    def _handle_event_func_CALL_UPDATE(self, headers):
         return
 
     def _handle_event_func_HEARTBEAT(self, headers):
@@ -255,7 +313,7 @@ class FreeSwitchClient():
         return
 
     def _handle_event_func_PRESENCE_IN(self, headers):
-        self._update_sip_phone_presence(headers)
+        #self._update_sip_phone_presence(headers)
         return
     
     def _handle_event_func_BACKGROUND_JOB(self, headers):
@@ -435,10 +493,11 @@ class FreeSwitchClient():
     def _update_sip_phone_presence(self, headers):
         _from = headers.get("from") or ""
         _event_type = headers.get("event_type") or ""
-        _user_agent = headers.get("user-agent") or ""
 
+        _logger.info("PRESENCE IN: [%s: %s]" % (_from, _event_type))
         if not _from or not _event_type:
             return
+
         _sip_number = _from.split("@")[0]
         with self.db_connection.cursor() as cr:
             cr.execute("""
@@ -450,3 +509,80 @@ class FreeSwitchClient():
             cr.commit()
         return
 
+    def _create_user_channel_map(self, headers):
+        #"Call-Direction"
+        #"Caller-Username"
+        #"Caller-Caller-ID-Number"
+        #"Unique-ID"
+        #"Caller-Destination-Number
+        # Channel-Call-UUID
+        # Other-Leg-Unique-ID
+        # Other-Leg-Destination-Number
+        _call_direction = headers.get("Call-Direction")
+        _uuid = headers.get("Unique-ID")
+        if not _uuid or not _call_direction:
+            _logger.error("CHANNEL CREATE WITHOUT direction or unique id [%s]" % headers)
+            return
+        _other_leg_unique_id = headers.get("Other-Leg-Unique-ID")
+        if _other_leg_unique_id:
+            _other_channel = self.channels.get(_other_leg_unique_id)
+            if _other_channel:
+                _other_channel.update({"other_uuid": _uuid})
+        self.channels[_uuid] = {
+            "uuid": _uuid,
+            "call_direction": _call_direction,
+            "caller_id": headers.get("Caller-Caller-ID-Number"),
+            "called_id": headers.get("Caller-Destination-Number"),
+            "other_uuid": _other_leg_unique_id
+        }
+
+        _logger.info("CHANNEL CREATE : %s: " % self.channels)
+        return    
+
+    def _update_sip_phone_answer(self, headers):
+        _uuid = headers.get("Unique-ID")
+        _sip_number = self._get_sip_number_from_channel_map(_uuid)
+        self._update_sip_phone_status(_sip_number, "talking")
+        return
+
+    def _update_sip_phone_channel_create(self, headers):
+        _uuid = headers.get("Unique-ID")
+        _sip_number = self._get_sip_number_from_channel_map(_uuid)
+
+        _call_direction = self.channels[_uuid]["call_direction"]
+
+        _status = "calling"
+        if _call_direction == "outbound":
+            _status = "ringing"
+        self._update_sip_phone_status(_sip_number, _status)
+        return
+
+    def _update_sip_phone_hangup(self, headers):
+        _uuid = headers.get("Unique-ID")
+        _sip_number = self._get_sip_number_from_channel_map(_uuid)
+        self._update_sip_phone_status(_sip_number, "hangup")
+        return
+
+    def _remove_user_channel_map(self, headers):
+        _uuid = headers.get("Unique-ID")
+        del self.channels[_uuid]
+        return
+
+    def _get_sip_number_from_channel_map(self, _uuid):
+        # inbound/outbound is from FreeSwitch' point of view.
+        # not real world meaning.
+        _channel = self.channels[_uuid]
+        if _channel["call_direction"] == "inbound":
+            return _channel["caller_id"]
+        return _channel["caller_id"]
+
+    def _update_sip_phone_status(self, sip_number, status):
+        with self.db_connection.cursor() as cr:
+            cr.execute("""
+            UPDATE res_users SET
+            sip_phone_status='%s',
+            sip_phone_last_seen=now()
+            WHERE sip_number='%s'
+            """ % (status, sip_number))
+            cr.commit()
+        return
