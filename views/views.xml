@@ -192,12 +192,14 @@
     <record id="open_view_agents_list" model="ir.actions.act_window">
       <field name="name">Agents</field>
       <field name="res_model">res.users</field>
+      <field name="domain">[["is_callcenter_agent", "=", True]]</field>
       <field name="view_mode">tree,form</field>
     </record>
 
     <record id="open_view_supervisors_list" model="ir.actions.act_window">
       <field name="name">Supervisors</field>
       <field name="res_model">res.users</field>
+      <field name="domain">[["is_callcenter_supervisor", "=", True]]</field>
       <field name="view_mode">tree,form</field>
     </record>
 

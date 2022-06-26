@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from odoo import api, fields, models, _
 
+_logger = logging.getLogger(__name__)
 
 class ResUsers(models.Model):
 
     _inherit = "res.users"
 
+    is_callcenter_agent = fields.Boolean('Is Callcenter Agent', compute='_compute_is_callcenter_agent', readonly=True, default=False, store=True)
+    
+    is_callcenter_supervisor = fields.Boolean('Is Callcenter Supervisor', compute='_compute_is_callcenter_supervisor', readonly=True, default=False, store=True) 
+    
     sip_number = fields.Char('Sip Number', required=False)
     sip_password = fields.Char('Sip Password', required=False)
     
@@ -81,3 +88,25 @@ class ResUsers(models.Model):
     @api.depends('sip_number')
     def _compute_agent_name(self):
         return "%s@default" % self.sip_number
+
+    def _compute_is_callcenter_agent(self):
+        for record in self:
+            if record.sip_number and record.has_group("odoo_freeswitch_cti.group_sip_user"):
+                record.is_callcenter_agent = True
+            else:
+                record.is_callcenter_agent = False
+        return
+
+    def _compute_is_callcenter_supervisor(self):
+        for record in self:
+            if record.sip_number and record.has_group("odoo_freeswitch_cti.group_sip_supervisor"):
+                record.is_callcenter_supervisor = True
+            else:
+                record.is_callcenter_supervisor = False
+        return
+
+
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        self.env.add_to_compute(self._fields["is_callcenter_agent"], super().search([]))
+        self.env.add_to_compute(self._fields["is_callcenter_supervisor"], super().search([]))
+        return super().search(args, offset, limit, order, count)
