@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+  <record id="freeswitch_cti_freeswitch" model="freeswitch_cti.freeswitch">
+    <field name="name">Local Freeswitch Test Node</field>
+    <field name="freeswitch_ip">192.168.50.79</field>
+    <field name="freeswitch_hostname">guijin-mbp-16</field>
+    <field name="freeswitch_password">ppmessage</field>
+    <field name="is_active" eval="True"></field>
+  </record>
+</odoo>

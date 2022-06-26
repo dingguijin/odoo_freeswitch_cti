@@ -1,5 +1,126 @@
 <odoo>
   <data>
+    
+    <record id="sip_view_users_form" model="ir.ui.view">
+      <field name="name">sip.res.users.form</field>
+      <field name="model">res.users</field>
+      <field name="inherit_id" ref="base.view_users_form" />
+      <field name="arch" type="xml">
+        <xpath expr="//notebook/page[1]" position="after">
+          <page string="CallCenter User" name="callcenter_user">
+            <group>
+              <group>
+                <field name="sip_number" />
+              </group>
+              <group>
+                <field name="sip_password" />
+              </group>            
+            </group>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="sip_view_res_users_preferences_form" model="ir.ui.view">
+      <field name="name">sip.res.users.preferences_form</field>
+      <field name="model">res.users</field>
+      <field name="inherit_id" ref="base.view_users_form_simple_modif" />
+      <field name="arch" type="xml">
+        <xpath expr="//notebook/page[1]" position="after">
+          <page string="CallCenter User" name="callcenter_user" groups="odoo_freeswitch_cti.group_sip_user">
+            <group>
+              <group>
+                <field name="sip_number" />
+              </group>
+              <group>
+                <field name="sip_password" />
+              </group>            
+            </group>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Views -->
+    <record id="freeswitch_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.freeswitch.view.tree</field>
+      <field name="model">freeswitch_cti.freeswitch</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="freeswitch_hostname"/>
+          <field name="freeswitch_ip"/>
+          <field name="freeswitch_password"/>
+          <field name="is_active"/>
+          <field name="is_online"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="agent_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.agent.view.tree</field>
+      <field name="model">res.users</field>
+      <field name="arch" type="xml">
+        <tree js_class="agent_list">
+          <field name="name" />
+          <field name="sip_number" />
+          <field name="sip_register_status" />
+          <field name="sip_phone_status" />
+          <field name="sip_agent_status" />
+          <field name="sip_phone_user_agent" />
+          <field name="sip_phone_ip" />
+          <field name="sip_auth_realm" />
+          <field name="sip_phone_last_seen" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="queue_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.callcenter.queue.view.tree</field>
+      <field name="model">freeswitch_cti.callcenter_queue</field>
+      <field name="arch" type="xml">
+        <tree js_class="queue_list">
+          <field name="name" />
+          <field name="strategy" />
+          <field name="queue_agents" widget="many2many_tags"/>
+          <field name="active_customers" widget="many2many_tags" />
+        </tree>
+      </field>
+    </record>
+
+    
+    <record id="supervisor_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.supervisor.view.tree</field>
+      <field name="model">res.users</field>
+      <field name="arch" type="xml">
+        <tree>
+        </tree>
+      </field>
+    </record>
+
+    <record id="open_view_freeswitch_list" model="ir.actions.act_window">
+      <field name="name">Freeswitchs</field>
+      <field name="res_model">freeswitch_cti.freeswitch</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="open_view_agents_list" model="ir.actions.act_window">
+      <field name="name">Agents</field>
+      <field name="res_model">res.users</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="open_view_supervisors_list" model="ir.actions.act_window">
+      <field name="name">Supervisors</field>
+      <field name="res_model">res.users</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="open_view_callcenter_queue_list" model="ir.actions.act_window">
+      <field name="name">Queues</field>
+      <field name="res_model">freeswitch_cti.callcenter_queue</field>
+      <field name="view_mode">tree,form</field>
+    </record>
 
     <!-- Views -->
     <record id="freeswitch_cti_command_view_tree" model="ir.ui.view">
@@ -47,25 +168,54 @@
       <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Menus -->
-    <!-- <menuitem -->
-    <!--     id="menu_freeswitch_xml_curl_root" -->
-    <!--     name="Freeswitch" -->
-    <!--     web_icon="freeswitch_xml_curl/static/description/icon.png" -->
-    <!--     sequence="75"/> -->
     
+    <!-- Menus -->
+    <menuitem
+        id="menu_freeswitch_cti_root"
+        name="CallCenter"
+        web_icon="freeswitch_cti/static/description/icon.png"
+        sequence="75"/>
+    
+    <menuitem
+        id="menu_all_freeswitchs"
+        name="All Freeswitchs"
+        parent="menu_freeswitch_cti_root"
+        action="open_view_freeswitch_list"
+        sequence="0"/>
+
+    <menuitem
+        id="menu_all_agents"
+        name="All Agents"
+        parent="menu_freeswitch_cti_root"
+        action="open_view_agents_list"
+        sequence="1"/>
+
+    <menuitem
+        id="menu_all_supervisors"
+        name="All SuperVisors"
+        parent="menu_freeswitch_cti_root"
+        action="open_view_supervisors_list"
+        sequence="2"/>
+
     <menuitem
         id="menu_all_cti_commands"
         name="CTI Commands"
-        parent="odoo_freeswitch_xml_curl.menu_freeswitch_xml_curl_root"
+        parent="menu_freeswitch_cti_root"
         action="open_view_cti_command_list"
         sequence="0"/>
 
     <menuitem
         id="menu_all_cti_events"
         name="CTI Events"
-        parent="odoo_freeswitch_xml_curl.menu_freeswitch_xml_curl_root"
+        parent="menu_freeswitch_cti_root"
         action="open_view_cti_event_list"
+        sequence="0"/>
+
+    <menuitem
+        id="menu_all_callcenter_queues"
+        name="Callcenter Queues"
+        parent="menu_freeswitch_cti_root"
+        action="open_view_callcenter_queue_list"
         sequence="0"/>
 
   </data>

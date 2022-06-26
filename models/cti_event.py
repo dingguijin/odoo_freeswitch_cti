@@ -10,7 +10,7 @@ class CtiEvent(models.Model):
 
     
     name = fields.Char('Event Name', required=True)
-    freeswitch = fields.Many2one('freeswitch_xml_curl.freeswitch', string='FreeSWITCH')
+    freeswitch = fields.Many2one('freeswitch_cti.freeswitch', string='FreeSWITCH')
 
     content_type = fields.Char('Content Type', required=False)
     content_length = fields.Integer('Content Length', required=False)

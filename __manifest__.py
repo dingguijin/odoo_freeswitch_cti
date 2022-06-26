@@ -9,16 +9,18 @@
     'description': """
         This module provides CTI connection with FreeSWITCH.
         """,
-    'depends': ['mail', 'odoo_freeswitch_xml_curl'],
+    'depends': ['mail'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
-        'views/views.xml'
+        'views/views.xml',
+        'data/freeswitch.xml'
     ],
     'assets': {
         'web.assets_qweb': [
         ],
         'web.assets_backend': [
+            'odoo_freeswitch_cti/static/src/js/agent_list.js'
         ],
         'web.assets_frontend': [
         ],

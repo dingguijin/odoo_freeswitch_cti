@@ -305,11 +305,14 @@ class FreeSwitchClient():
 
     def _handle_event_func_CUSTOM(self, headers):
         _subclass = headers.get("Event-Subclass")
-        if _subclass == "sofia::register_attempt":
+        if not _subclass:
             return
-        if _subclass == "sofia::register":
-            self._update_sip_register_status(headers)
+        _subclass_handler_name = "_handle_subclass_func_%s" % _subclass.split("::").join("_")
+        if not hasattr(self, _subclass_handler_name):
+            _logger.error("No subclass [%s] handler" % _subclass)
             return
+
+        self.getattr(_subclass_handler_name)(headers)
         return
 
     def _handle_event_func_PRESENCE_IN(self, headers):
@@ -386,6 +389,11 @@ class FreeSwitchClient():
             "sofia::gateway_delete",
             "sofia::gateway_state"
         ]
+
+        _customs += [
+            "callcenter::info"
+        ]
+        
         self._send_cmd("event plain ALL")
         self._send_cmd("event CUSTOM %s" % " ".join(_customs))
         return
@@ -415,7 +423,7 @@ class FreeSwitchClient():
         _freeswith = None
         with db.cursor() as cr:
             cr.execute("""
-            SELECT * FROM freeswitch_xml_curl_freeswitch
+            SELECT * FROM freeswitch_cti_freeswitch
             WHERE is_active = true
             ORDER BY create_date DESC
             LIMIT 1
@@ -426,7 +434,7 @@ class FreeSwitchClient():
     def _update_freeswitch_info_last_seen(self):
         with self.db_connection.cursor() as cr:
             cr.execute("""
-            UPDATE freeswitch_xml_curl_freeswitch
+            UPDATE freeswitch_cti_freeswitch
             set last_seen=now()
             WHERE id=%d
             """ % self.freeswitch_info["id"])
@@ -466,9 +474,158 @@ class FreeSwitchClient():
                 _r = await resp.json()
                 #_logger.info("push cti_event: %s" % _r)
         return
+
+    def _handle_subclass_func_callcenter_info(self, headers):
+        """
+        agent-status-change
+        When an agent's Status changes, this event is generated with the agent's new Status.
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Agent: 1000@default
+        CC-Action: agent-status-change
+        CC-Agent-Status: Available
+
+        agent-state-change
+        Every time an agent's State changes, this event is generated.
+
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Agent: 1000@default
+        CC-Action: agent-state-change
+        CC-Agent-State: Receiving
+
+        agent-offering
+        Every time a caller is presented to an agent (before he answers), this event is generated.
+        
+        Event-Subclass: callcenter::info 
+        Event-Name: CUSTOM 
+        CC-Queue: support@default
+        CC-Agent: AgentNameHere
+        CC-Action: agent-offering 
+        CC-Agent-System: single_box 
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: 600165a4-f748-11df-afdd-b386769690cd 
+        CC-Member-CID-Name: CHOUINARD MO 
+        CC-Member-CID-Number: 4385551212
+
+        bridge-agent-start
+        When an agent is connected, this event is generated. NOTE: the channel variables, including, for example, Event-Date-Timestamp are present as well as the callcenter values.
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: bridge-agent-start
+        CC-Agent: AgentNameHere
+        CC-Agent-System: single_box
+        CC-Agent-UUID: 7acfecd3-ab50-470b-8875-d37aba0429ba
+        CC-Agent-Called-Time: 10000
+        CC-Agent-Answered-Time: 10009
+        CC-Member-Joined-Time: 9000
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: c6360976-231c-43c6-bda7-7ac4c7d1c125
+        CC-Member-CID-Name: Their Name
+        CC-Member-CID-Number: 555-555-5555
+
+        bridge-agent-end
+        When an agent is disconnected, this event is generated. NOTE: the channel variables, including, for example, Event-Date-Timestamp are present as well as the callcenter values.
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: bridge-agent-end
+        CC-Agent: AgentNameHere
+        CC-Agent-System: single_box
+        CC-Agent-UUID: 7acfecd3-ab50-470b-8875-d37aba0429ba
+        CC-Agent-Called-Time: 10000
+        CC-Agent-Answered-Time: 10009
+        CC-Bridge-Terminated-Time: 10500
+        CC-Member-Joined-Time: 9000
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: c6360976-231c-43c6-bda7-7ac4c7d1c125
+        CC-Member-CID-Name: Their Name
+        CC-Member-CID-Number: 555-555-5555
+
+        bridge-agent-fail
+        When an agent originate fail, this event is generated. NOTE: the channel variables, including, for example, Event-Date-Timestamp are present as well as the callcenter values.
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: bridge-agent-fail
+        CC-Hangup-Cause: CHECK FS HANGUP CAUSE
+        CC-Agent: AgentNameHere
+        CC-Agent-System: single_box
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: c6360976-231c-43c6-bda7-7ac4c7d1c125
+        CC-Member-CID-Name: Their Name
+        CC-Member-CID-Number: 555-555-5555
         
 
-    def _update_sip_register_status(self, headers):
+        members-count
+        This event is generated every time the queue count api is called and anytime a caller enters or leaves the queue.
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: members-count
+        CC-Count: 1
+        CC-Selection: Single-Queue
+
+        member-queue-start
+        Joining the queue triggers this event, allowing you to track when callers enter the queue.
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: member-queue-start
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: b77c49c2-a732-11df-9438-e7d9456f8886
+        CC-Member-CID-Name: CHOUINARD MO
+        CC-Member-CID-Number: 4385551212
+        
+        member-queue-end
+        This is generated when a caller leaves the queue. Different lengths of queue-specific times are reported in seconds. There are two values for CC-Cause: 'Terminated' and 'Cancel'.
+        
+        'Terminated' means the call ended after talking to an agent. Here is an example:
+        
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: member-queue-end
+        CC-Hangup-Cause: CHECK FS HANGUP CAUSE
+        CC-Cause: Terminated
+        CC-Agent-Called-Time: 10000
+        CC-Agent-Answered-Time: 10009
+        CC-Member-Joined-Time: 9000
+        CC-Member-Leaving-Time: 10100
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: b77c49c2-a732-11df-9438-e7d9456f8886
+        CC-Member-CID-Name: CHOUINARD MO
+        CC-Member-CID-Number: 4385551212
+
+        If we get a hangup from the caller before talking to an agent, the CC-Cause will be 'Cancel'. CC-Cause-Reason will contain the reason of the drop between NONE (no specific reason), TIMEOUT (caller has been waiting more than the timeout), NO_AGENT_TIMEOUT (caller has been waiting more than the no_agent_timeout), and BREAK_OUT (caller abandoned). Here's an example:
+
+        Event-Subclass: callcenter::info
+        Event-Name: CUSTOM
+        CC-Queue: support@default
+        CC-Action: member-queue-end
+        CC-Member-Joined-Time: 9000
+        CC-Member-Leaving-Time: 10050
+        CC-Cause: Cancel
+        CC-Cancel-Reason: TIMEOUT
+        CC-Member-UUID: 453324f8-3424-4322-4242362fd23d 
+        CC-Member-Session-UUID: e260ffd0-a731-11df-9341-e7d9456f8886
+        CC-Member-CID-Name: Marc O Robinson
+        CC-Member-CID-Number: 5145551212
+        
+        """
+        return
+    
+    def _handle_subclass_func_sofia_register_attempt(self, headers):
+        return
+
+    def _handle_subclass_func_sofia_register(self, headers):
         _status = headers.get("status") or ""# Registered(UDP)
         _user_agent = headers.get("user-agent") or ""
         _sip_auth_username = headers.get("sip_auth_username") or ""
