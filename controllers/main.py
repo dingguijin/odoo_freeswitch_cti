@@ -11,6 +11,8 @@ class Main(http.Controller):
 
     @http.route('/web/cti_command', type='json', auth="user", methods=['POST'])
     def cti_command(self):
+        # write command to cti_command and make status new
+
         return http.request.make_response(json.dumps({"result": "OK"}), [('Content-Type', 'application/json')])
 
     @http.route('/web/cti_event/<int:event>', type='http', auth="none", methods=['GET'])

@@ -83,11 +83,15 @@ class ResUsers(models.Model):
 
     @api.depends('sip_number')
     def _compute_agent_contact(self):
-        return "user/%s" % self.sip_number
+        for record in self:
+            record.agent_contact = "user/%s" % record.sip_number
+        return
 
     @api.depends('sip_number')
     def _compute_agent_name(self):
-        return "%s@default" % self.sip_number
+        for record in self:
+            record.agent_name = "%s@default" % record.sip_number
+        return
 
     def _compute_is_callcenter_agent(self):
         for record in self:

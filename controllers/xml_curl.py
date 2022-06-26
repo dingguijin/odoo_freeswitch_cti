@@ -30,6 +30,60 @@ _CONFIGURATION_XML_TEMPLATE = """
 _logger = logging.getLogger(__name__)
 
 class FreeSwitchXmlCurl(http.Controller):
+
+    def _search_all(self, table):
+        _model = http.request.env[table].sudo()
+        return _model.search([])
+
+    def _search_callcenter_tiers(self):
+        return self._search_all("freeswitch_cti.callcenter_tier")
+    
+    def _search_callcenter_queues(self):
+        return self._search_all("freeswitch_cti.callcenter_queue")
+
+    def _search_callcenter_agents(self):
+        return self._search_all("res.users")
+
+    def _callcenter_queue_xml(self, queue):
+        _xml = """<queue name="%s">%s<queue>"""
+        _param_template = """<param name="%s" value="%s">"""
+        _params = []
+        _params.append(_param_template % ("strategy", queue.strategy))
+        _params.append(_param_template % ("moh-sound", queue.moh_sound))
+        _params.append(_param_template % ("record-template", queue.record_template))
+        _params.append(_param_template % ("time-base-score", queue.time_base_score))
+        _params.append(_param_template % ("tier-rules-apply", queue.tier_rules_apply))
+        _params.append(_param_template % ("tier-rule-wait-second", queue.tier_rule_wait_second))
+        _params.append(_param_template % ("tier-rule-wait-multiply-level", queue.tier_rule_wait_multiple_level))
+        _params.append(_param_template % ("tier-rule-no-agent-no-wait", queue.tier_rule_no_agent_no_wait))
+        _params.append(_param_template % ("discard-abandoned-after", queue.discard_abandoned_after))
+        _params.append(_param_template % ("max-wait-time", queue.max_wait_time))
+        _params.append(_param_template % ("max-wait-time-with-no-agent", queue.max_wait_time_with_no_agent))
+        
+        _xml = _xml % (queue.name, "\n".join(_params))
+        return _xml
+
+    def _callcenter_agent_xml(self, agent):
+        _xml = """<agent name="%s" type="%s" contact="%s" status="%s" max-no-answer="%s" wrap-up-time="%s" reject-delay-time="%s" busy-delay-time="%s"><agent>"""
+        
+        _xml = _xml % (agent.agent_name,
+                       agent.agent_type,
+                       agent.agent_contact,
+                       agent.agent_status,
+                       agent.agent_max_no_answer,
+                       agent.agent_wrap_up_time,
+                       agent.agent_reject_delay_time,
+                       agent.agent_busy_delay_time)
+        return _xml
+
+    def _callcenter_tier_xml(self, tier):
+        _xml = """<tier agent="%s" queue="%s" level="%s" position="%s"><tier>"""
+        _xml = _xml % (tier.tier_agent_id.agent_name,
+                       tier.tier_queue_id.name,
+                       tier.tier_level,
+                       tier.tier_position)
+        return _xml
+    
     def _get_freeswitch_ip(self):
         _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
         _ss = _model.search_read([("is_active", '=', True)], limit=1)
@@ -424,8 +478,42 @@ class FreeSwitchXmlCurl(http.Controller):
         return _EMPTY_XML
 
     def _callcenter_conf(self):
-        return _EMPTY_XML
-    
+        _content = """
+        <settings>
+        </settings>
+        {{queues}}
+        {{agents}}
+        {{tiers}}
+        """
+        _queues = self._search_callcenter_queues() or []
+        _xmls = []
+        for _queue in _queues:
+            _xmls.append(self._callcenter_queue_xml(_queue))
+        _queues = "<queues>%s\n</queues>" % "\n".join(_xmls)
+
+        _agents = self._search_callcenter_agents() or []
+        _xmls = []
+        for _agent in _agents:            
+            if not _agent.sip_number:
+                continue
+            if not _agent.has_group("odoo_freeswitch_cti.group_sip_user"):
+                continue
+            _xmls.append(self._callcenter_agent_xml(_agent))
+        _agents = "<agents>%s\n</agents>" % "\n".join(_xmls)
+
+        _tiers = self._search_callcenter_tiers() or []
+        _xmls = []
+        for _tier in _tiers:
+            _xmls.append(self._callcenter_tier_xml(_tier))
+        _tiers = "<tiers>%s\n</tiers>" % "\n".join(_xmls)
+
+        _content = _content.replace("{{queues}}", _queues)
+        _content = _content.replace("{{agents}}", _agents)
+        _content = _content.replace("{{tiers}}", _tiers)
+
+        _logger.info(">>>>>>>>CALLCENTER<<<<<<<<<<< %s" % _content)
+        return _CONFIGURATION_XML_TEMPLATE % ("callcenter", "callcenter", _content)
+
     def _acl_conf(self):
         _content = """
         <network-lists>

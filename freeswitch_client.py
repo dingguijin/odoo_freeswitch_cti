@@ -307,12 +307,11 @@ class FreeSwitchClient():
         _subclass = headers.get("Event-Subclass")
         if not _subclass:
             return
-        _subclass_handler_name = "_handle_subclass_func_%s" % _subclass.split("::").join("_")
+        _subclass_handler_name = "_handle_subclass_func_%s" % ("_").join(_subclass.split("::"))
         if not hasattr(self, _subclass_handler_name):
             _logger.error("No subclass [%s] handler" % _subclass)
             return
-
-        self.getattr(_subclass_handler_name)(headers)
+        getattr(self, _subclass_handler_name)(headers)
         return
 
     def _handle_event_func_PRESENCE_IN(self, headers):

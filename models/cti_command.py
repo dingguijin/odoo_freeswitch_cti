@@ -18,3 +18,11 @@ class CtiCommand(models.Model):
     execute_time = fields.Datetime('Execute Time', required=False)
     confirm_time = fields.Datetime('Confirm Time', required=False)
     
+    @api.model
+    def send_cti_command(self, command, parameter=""):
+        self.create({
+            "name": command,
+            "parameter": parameter or "",
+            "status": "NEW"
+        })
+        return

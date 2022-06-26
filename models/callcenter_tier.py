@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models, _
 
+from . import cti_command
 
 class CallcenterTier(models.Model):
 
@@ -18,3 +19,8 @@ class CallcenterTier(models.Model):
     _sql_constraints = [
         ('tier_unique', 'UNIQUE(tier_agent_id, tier_queue_id)', 'One agent in queue one time')
     ]
+
+    def create(self, val):
+        _r = super().create(val)
+        cti_command.send_cti_command("bgapi", "callcenter queue reload")
+        return _r
