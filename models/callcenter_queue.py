@@ -30,13 +30,13 @@ class CallcenterQueue(models.Model):
                                  ], 'Strategy', default='round-robin')
 
     # the system will playback whatever you specify to incoming callers.
-    moh_sound = fields.Char('Moh Sound', required=False)
+    moh_sound = fields.Char('Moh Sound', default="local_stream://moh", required=False)
 
     # record file $${base_dir}/recordings
-    record_template = fields.Char('', required=False)
+    record_template = fields.Char('Recorde Template', default="$${base_dir}/recordings/", required=False)
 
     # Add number of seconds to raising the caller's score.
-    time_base_score = fields.Selection([('queue', 'Queue'), ('system', 'System')])
+    time_base_score = fields.Selection([('queue', 'Queue'), ('system', 'System')], default="system")
 
     # Can be True or False.
     # This defines if we should apply the following tier rules
@@ -105,13 +105,12 @@ class CallcenterQueue(models.Model):
 
     @api.depends("queue_tiers")
     def _compute_queue_agents(self):
-        _logger.info(">>>>>>>_Compute queue agents")
         for record in self:
             if not record.queue_tiers:
                 self.queue_agents = []
                 return
             ids = map(lambda x: x.tier_agent_id.id, record.queue_tiers)
-            if not _ids:
+            if not ids:
                 self.queue_agents = []
                 return
             self.queue_agents = [fields.Command.set(ids)]

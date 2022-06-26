@@ -9,7 +9,7 @@
     'description': """
         This module provides CTI connection with FreeSWITCH.
         """,
-    'depends': ['mail'],
+    'depends': ['mail', 'contacts'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -21,6 +21,7 @@
         ],
         'web.assets_backend': [
             'odoo_freeswitch_cti/static/src/js/agent_list.js'
+            'odoo_freeswitch_cti/static/src/js/queue_list.js'
         ],
         'web.assets_frontend': [
         ],

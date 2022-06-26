@@ -8,7 +8,7 @@ class CallcenterTier(models.Model):
     _name = "freeswitch_cti.callcenter_tier"
     _description = "Callcenter Tier"
 
-    name = fields.Char('Name', required=True)
+    name = fields.Char('Name', related="tier_agent_id.name")
     
     tier_agent_id = fields.Many2one('res.users', 'Agent', required=True)
     tier_queue_id = fields.Many2one('freeswitch_cti.callcenter_queue', 'Queue', required=True)

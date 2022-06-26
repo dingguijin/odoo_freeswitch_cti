@@ -87,7 +87,6 @@
         </tree>
       </field>
     </record>
-
     
     <record id="supervisor_view_tree" model="ir.ui.view">
       <field name="name">freeswitch_cti.supervisor.view.tree</field>
@@ -98,6 +97,92 @@
       </field>
     </record>
 
+    <!-- Form view -->
+    <record id="view_open_view_callcenter_queue_form" model="ir.ui.view"> 
+      <field name="name">freeswitch_cti.callcenter_queue.form</field>  
+      <field name="model">freeswitch_cti.callcenter_queue</field>
+      <field eval="18" name="priority"/>
+      <field name="arch" type="xml">
+        <form string="Queues">
+          <sheet>
+            <group>
+              <group>
+                <field name="name" />
+                <field name="strategy" />
+              </group>
+              <group>
+                <field name="moh_sound" />
+                <field name="record_template" />
+                <field name="time_base_score" />
+                
+                <field name="tier_rules_apply" />
+                <field name="tier_rule_wait_second" />
+
+                <field name="tier_rule_wait_multiple_level" />
+                
+                <field name="tier_rule_no_agent_no_wait" />
+
+                <field name="discard_abandoned_after" />
+                
+                <field name="abandoned_resume_allowed" />
+                <field name="max_wait_time" />
+                <field name="max_wait_time_with_no_agent" />
+                
+                <field name="max_wait_time_with_no_agent_time_reached" />
+                <field name="ring_progressively_delay" />
+
+              </group>
+            </group>
+            <notebook>
+              <page string="Queue Tiers">
+                <field name="queue_tiers">
+                  <tree editable="bottom">
+                    <field name="tier_agent_id" />
+                    <field name="tier_level" />
+                    <field name="tier_position" />
+                  </tree>
+                </field>
+              </page>
+              <page string="Queue Agents">
+                <field name="queue_agents">
+                  <tree>
+                    <field name="name" />
+                    <field name="sip_number" />
+                    <field name="sip_agent_status" />
+                  </tree>
+                </field>
+              </page>
+
+              <page string="Active Customers">
+                <field name="active_customers">
+                  <tree>
+                    <field name="name" />
+                  </tree>
+                </field>
+              </page>
+              
+              <page string="Queue Customers">
+                <field name="queue_customers">
+                  <tree>
+                    <field name="name" />
+                  </tree>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+    
+    <!-- Action view -->
+    <!-- <record id="action_open_view_callcenter_queue_form" model="ir.actions.act_window.view"> -->
+    <!--   <field eval="10" name="sequence"/> -->
+    <!--   <field name="view_mode">form</field> -->
+    <!--   <field name="view_id" ref="view_open_view_callcenter_queue_form"/> -->
+    <!--   <field name="act_window_id" ref="open_view_callcenter_queue_list"/> -->
+    <!-- </record> -->
+
+    <!-- Actions -->
     <record id="open_view_freeswitch_list" model="ir.actions.act_window">
       <field name="name">Freeswitchs</field>
       <field name="res_model">freeswitch_cti.freeswitch</field>
