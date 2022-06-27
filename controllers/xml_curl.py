@@ -45,8 +45,8 @@ class FreeSwitchXmlCurl(http.Controller):
         return self._search_all("res.users")
 
     def _callcenter_queue_xml(self, queue):
-        _xml = """<queue name="%s">%s<queue>"""
-        _param_template = """<param name="%s" value="%s">"""
+        _xml = """<queue name="%s">%s</queue>"""
+        _param_template = """<param name="%s" value="%s" />"""
         _params = []
         _params.append(_param_template % ("strategy", queue.strategy))
         _params.append(_param_template % ("moh-sound", queue.moh_sound))
@@ -64,7 +64,7 @@ class FreeSwitchXmlCurl(http.Controller):
         return _xml
 
     def _callcenter_agent_xml(self, agent):
-        _xml = """<agent name="%s" type="%s" contact="%s" status="%s" max-no-answer="%s" wrap-up-time="%s" reject-delay-time="%s" busy-delay-time="%s"><agent>"""
+        _xml = """<agent name="%s" type="%s" contact="%s" status="%s" max-no-answer="%s" wrap-up-time="%s" reject-delay-time="%s" busy-delay-time="%s"></agent>"""
         
         _xml = _xml % (agent.agent_name,
                        agent.agent_type,
@@ -77,7 +77,7 @@ class FreeSwitchXmlCurl(http.Controller):
         return _xml
 
     def _callcenter_tier_xml(self, tier):
-        _xml = """<tier agent="%s" queue="%s" level="%s" position="%s"><tier>"""
+        _xml = """<tier agent="%s" queue="%s" level="%s" position="%s"></tier>"""
         _xml = _xml % (tier.tier_agent_id.agent_name,
                        tier.tier_queue_id.name,
                        tier.tier_level,
@@ -475,7 +475,387 @@ class FreeSwitchXmlCurl(http.Controller):
         return _EMPTY_XML
     
     def _conference_conf(self):
-        return _EMPTY_XML
+        _content = """
+        <!-- Advertise certain presence on startup . -->
+        <advertise>
+        <room name="3001@$${domain}" status="FreeSWITCH"/>
+        </advertise>
+        
+        <!-- These are the default keys that map when you do not specify a caller control group -->	
+        <!-- Note: none and default are reserved names for group names.  Disabled if dist-dtmf member flag is set. -->	
+        <caller-controls>
+        <group name="default">
+        <control action="mute" digits="0"/>
+        <control action="deaf mute" digits="*"/>
+        <control action="energy up" digits="9"/>
+        <control action="energy equ" digits="8"/>
+        <control action="energy dn" digits="7"/>
+        <control action="vol talk up" digits="3"/>
+        <control action="vol talk zero" digits="2"/>
+        <control action="vol talk dn" digits="1"/>
+        <control action="vol listen up" digits="6"/>
+        <control action="vol listen zero" digits="5"/>
+        <control action="vol listen dn" digits="4"/>
+        <control action="hangup" digits="#"/>
+        </group>
+        </caller-controls>
+
+        <!-- Profiles are collections of settings you can reference by name. -->
+        <profiles>
+        <!--If no profile is specified it will default to "default"-->
+        <profile name="default">
+        <!-- Directory to drop CDR's 
+        'auto' means $PREFIX/logs/conference_cdr/<confernece_uuid>.cdr.xml
+	a non-absolute path means $PREFIX/logs/<value>/<confernece_uuid>.cdr.xml
+	absolute path means <value>/<confernece_uuid>.cdr.xml
+        -->
+        <!-- <param name="cdr-log-dir" value="auto"/> -->
+        
+        <!-- Domain (for presence) -->
+        <param name="domain" value="$${domain}"/>
+        <!-- Sample Rate-->
+        <param name="rate" value="8000"/>
+        <!-- Number of milliseconds per frame -->
+        <param name="interval" value="20"/>
+        <!-- Energy level required for audio to be sent to the other users -->
+        <param name="energy-level" value="100"/>
+        
+        <!--Can be | delim of waste|mute|deaf|dist-dtmf waste will always transmit data to each channel
+        even during silence.  dist-dtmf propagates dtmfs to all other members, but channel controls
+	via dtmf will be disabled. -->
+        <!-- <param name="member-flags" value="waste"/> -->
+        
+        <!-- Name of the caller control group to use for this profile -->
+        <!-- <param name="caller-controls" value="some name"/> -->
+        <!-- Name of the caller control group to use for the moderator in this profile -->
+        <!-- <param name="moderator-controls" value="some name"/> -->
+        <!-- TTS Engine to use -->
+        <!-- <param name="tts-engine" value="cepstral"/> -->
+        <!-- TTS Voice to use -->
+        <!-- <param name="tts-voice" value="david"/> -->
+
+        <!-- If TTS is enabled all audio-file params beginning with -->
+        <!-- 'say:' will be considered text to say with TTS -->
+        <!-- Override the default path here, after which you use relative paths in the other sound params -->
+        <!-- Note: The default path is the conference's first caller's sound_prefix -->
+        <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
+        <!-- File to play to acknowledge succees -->
+        <!-- <param name="ack-sound" value="beep.wav"/> -->
+        <!-- File to play to acknowledge failure -->
+        <!-- <param name="nack-sound" value="beeperr.wav"/> -->
+        <!-- File to play to acknowledge muted -->
+        <param name="muted-sound" value="conference/conf-muted.wav"/>
+        <!-- File to play to acknowledge unmuted -->
+        <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+        <!-- File to play if you are alone in the conference -->
+        <param name="alone-sound" value="conference/conf-alone.wav"/>
+        <!-- File to play endlessly (nobody will ever be able to talk) -->
+        <!-- <param name="perpetual-sound" value="perpetual.wav"/> -->
+        <!-- File to play when you're alone (music on hold)-->
+        <param name="moh-sound" value="$${hold_music}"/>
+        <!-- File to play when you join the conference -->
+        <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+        <!-- File to play when you leave the conference -->
+        <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+        <!-- File to play when you are ejected from the conference -->
+        <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+        <!-- File to play when the conference is locked -->
+        <param name="locked-sound" value="conference/conf-locked.wav"/>
+        <!-- File to play when the conference is locked during the call-->
+        <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+        <!-- File to play when the conference is unlocked during the call-->
+        <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+        <!-- File to play to prompt for a pin -->
+        <param name="pin-sound" value="conference/conf-pin.wav"/>
+        <!-- File to play to when the pin is invalid -->
+        <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+        <!-- Conference pin -->
+        <!-- <param name="pin" value="12345"/> -->
+        <!-- <param name="moderator-pin" value="54321"/> -->
+        <!-- Max number of times the user can be prompted for PIN -->
+        <!-- <param name="pin-retries" value="3"/> -->
+        <!-- Default Caller ID Name for outbound calls -->
+        <param name="caller-id-name" value="$${outbound_caller_name}"/>
+        <!-- Default Caller ID Number for outbound calls -->
+        <param name="caller-id-number" value="$${outbound_caller_id}"/>
+        <!-- Suppress start and stop talking events -->
+        <!-- <param name="suppress-events" value="start-talking,stop-talking"/> -->
+        <!-- enable comfort noise generation -->
+        <param name="comfort-noise" value="true"/>
+        <!-- Uncomment auto-record to toggle recording every conference call. -->
+        <!-- Another valid value is   shout://user:pass@server.com/live.mp3   -->
+        <!--
+        <param name="auto-record" value="$${recordings_dir}/${conference_name}_${strftime(%Y-%m-%d-%H-%M-%S)}.wav"/>
+        -->
+        
+        <!-- IVR digit machine timeouts -->
+        <!-- How much to wait between DTMF digits to match caller-controls -->
+        <!-- <param name="ivr-dtmf-timeout" value="500"/> -->
+        <!-- How much to wait for the first DTMF, 0 forever -->
+        <!-- <param name="ivr-input-timeout" value="0" /> -->
+        <!-- Delay before a conference is asked to be terminated -->
+        <!-- <param name="endconf-grace-time" value="120" /> -->
+        <!-- Can be | delim of wait-mod|audio-always|video-bridge|video-floor-only
+        wait_mod will wait until the moderator in,
+        audio-always will always mix audio from all members regardless they are talking or not -->
+        <!-- <param name="conference-flags" value="audio-always"/> -->
+        <!-- Allow live array sync for Verto -->
+        <!-- <param name="conference-flags" value="livearray-sync"/> -->
+        </profile>
+        
+        <profile name="wideband">
+        <param name="domain" value="$${domain}"/>
+        <param name="rate" value="16000"/>
+        <param name="interval" value="20"/>
+        <param name="energy-level" value="100"/>
+        <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
+        <param name="muted-sound" value="conference/conf-muted.wav"/>
+        <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+        <param name="alone-sound" value="conference/conf-alone.wav"/>
+        <param name="moh-sound" value="$${hold_music}"/>
+        <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+        <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+        <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+        <param name="locked-sound" value="conference/conf-locked.wav"/>
+        <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+        <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+        <param name="pin-sound" value="conference/conf-pin.wav"/>
+        <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+        <param name="caller-id-name" value="$${outbound_caller_name}"/>
+        <param name="caller-id-number" value="$${outbound_caller_id}"/>
+        <param name="comfort-noise" value="true"/>
+        <!-- <param name="tts-engine" value="flite"/> -->
+        <!-- <param name="tts-voice" value="kal16"/> -->
+        </profile>
+        
+        <profile name="ultrawideband">
+        <param name="domain" value="$${domain}"/>
+        <param name="rate" value="32000"/>
+        <param name="interval" value="20"/>
+        <param name="energy-level" value="100"/>
+        <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
+        <param name="muted-sound" value="conference/conf-muted.wav"/>
+        <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+        <param name="alone-sound" value="conference/conf-alone.wav"/>
+      <param name="moh-sound" value="$${hold_music}"/>
+      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+      <param name="locked-sound" value="conference/conf-locked.wav"/>
+      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+      <param name="pin-sound" value="conference/conf-pin.wav"/>
+      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+      <param name="caller-id-name" value="$${outbound_caller_name}"/>
+      <param name="caller-id-number" value="$${outbound_caller_id}"/>
+      <param name="comfort-noise" value="true"/>
+
+      <!-- <param name="conference-flags" value="video-floor-only|rfc-4579|livearray-sync|auto-3d-position|transcode-video|minimize-video-encoding"/> -->
+
+      <!-- <param name="video-mode" value="mux"/> -->
+      <!-- <param name="video-layout-name" value="3x3"/> -->
+      <!-- <param name="video-layout-name" value="group:grid"/> -->
+      <!-- <param name="video-canvas-size" value="1280x720"/> -->
+      <!-- <param name="video-canvas-bgcolor" value="#333333"/> -->
+      <!-- <param name="video-layout-bgcolor" value="#000000"/> -->
+      <!-- <param name="video-codec-bandwidth" value="2mb"/> -->
+      <!-- <param name="video-fps" value="15"/> -->
+      <!-- <param name="video-auto-floor-msec" value="100"/> -->
+
+
+      <!-- <param name="tts-engine" value="flite"/> -->
+      <!-- <param name="tts-voice" value="kal16"/> -->
+    </profile>
+
+    <profile name="cdquality">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="48000"/>
+      <param name="interval" value="20"/>
+      <param name="energy-level" value="100"/>
+      <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
+      <param name="muted-sound" value="conference/conf-muted.wav"/>
+      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+      <param name="alone-sound" value="conference/conf-alone.wav"/>
+      <param name="moh-sound" value="$${hold_music}"/>
+      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+      <param name="locked-sound" value="conference/conf-locked.wav"/>
+      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+      <param name="pin-sound" value="conference/conf-pin.wav"/>
+      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+      <param name="caller-id-name" value="$${outbound_caller_name}"/>
+      <param name="caller-id-number" value="$${outbound_caller_id}"/>
+      <param name="comfort-noise" value="true"/>
+
+      <!-- <param name="conference-flags" value="video-floor-only|rfc-4579|livearray-sync|auto-3d-position|minimize-video-encoding"/> -->
+
+      <!-- <param name="video-mode" value="mux"/> -->
+      <!-- <param name="video-layout-name" value="3x3"/> -->
+      <!-- <param name="video-layout-name" value="group:grid"/> -->
+      <!-- <param name="video-canvas-size" value="1920x1080"/> -->
+      <!-- <param name="video-canvas-bgcolor" value="#333333"/> -->
+      <!-- <param name="video-layout-bgcolor" value="#000000"/> -->
+      <!-- <param name="video-codec-bandwidth" value="2mb"/> -->
+      <!-- <param name="video-fps" value="15"/> -->
+
+    </profile>
+
+    <profile name="video-mcu-stereo">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="48000"/>
+      <param name="channels" value="2"/>
+      <param name="interval" value="20"/>
+      <param name="energy-level" value="200"/>
+      <!-- <param name="tts-engine" value="flite"/> -->
+      <!-- <param name="tts-voice" value="kal16"/> -->
+      <param name="muted-sound" value="conference/conf-muted.wav"/>
+      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+      <param name="alone-sound" value="conference/conf-alone.wav"/>
+      <param name="moh-sound" value="$${hold_music}"/>
+      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+      <param name="locked-sound" value="conference/conf-locked.wav"/>
+      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+      <param name="pin-sound" value="conference/conf-pin.wav"/>
+      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+      <param name="caller-id-name" value="$${outbound_caller_name}"/>
+      <param name="caller-id-number" value="$${outbound_caller_id}"/>
+      <param name="comfort-noise" value="false"/>
+      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
+      <param name="video-auto-floor-msec" value="1000"/>
+      <param name="video-mode" value="mux"/>
+      <param name="video-layout-name" value="3x3"/>
+      <param name="video-layout-name" value="group:grid"/>
+      <param name="video-canvas-size" value="1920x1080"/>
+      <param name="video-canvas-bgcolor" value="#333333"/>
+      <param name="video-layout-bgcolor" value="#000000"/>
+      <param name="video-codec-bandwidth" value="3mb"/>
+      <param name="video-fps" value="30"/>
+      <!-- <param name="video-codec-config-profile-name" value="conference"/> -->
+    </profile>
+
+    <profile name="video-mcu-stereo-720">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="48000"/>
+      <param name="channels" value="2"/>
+      <param name="interval" value="20"/>
+      <param name="energy-level" value="200"/>
+      <!-- <param name="tts-engine" value="flite"/> -->
+      <!-- <param name="tts-voice" value="kal16"/> -->
+      <param name="muted-sound" value="conference/conf-muted.wav"/>
+      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+      <param name="alone-sound" value="conference/conf-alone.wav"/>
+      <param name="moh-sound" value="$${hold_music}"/>
+      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+      <param name="locked-sound" value="conference/conf-locked.wav"/>
+      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+      <param name="pin-sound" value="conference/conf-pin.wav"/>
+      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+      <param name="caller-id-name" value="$${outbound_caller_name}"/>
+      <param name="caller-id-number" value="$${outbound_caller_id}"/>
+      <param name="comfort-noise" value="false"/>
+      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
+      <param name="video-auto-floor-msec" value="1000"/>
+      <param name="video-mode" value="mux"/>
+      <param name="video-layout-name" value="3x3"/>
+      <param name="video-layout-name" value="group:grid"/>
+      <param name="video-canvas-size" value="1280x720"/>
+      <param name="video-canvas-bgcolor" value="#333333"/>
+      <param name="video-layout-bgcolor" value="#000000"/>
+      <param name="video-codec-bandwidth" value="3mb"/>
+      <param name="video-fps" value="30"/>
+    </profile>
+
+    <profile name="video-mcu-stereo-480">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="48000"/>
+      <param name="channels" value="2"/>
+      <param name="interval" value="20"/>
+      <param name="energy-level" value="200"/>
+      <!-- <param name="tts-engine" value="flite"/> -->
+      <!-- <param name="tts-voice" value="kal16"/> -->
+      <param name="muted-sound" value="conference/conf-muted.wav"/>
+      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+      <param name="alone-sound" value="conference/conf-alone.wav"/>
+      <param name="moh-sound" value="$${hold_music}"/>
+      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+      <param name="locked-sound" value="conference/conf-locked.wav"/>
+      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+      <param name="pin-sound" value="conference/conf-pin.wav"/>
+      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+      <param name="caller-id-name" value="$${outbound_caller_name}"/>
+      <param name="caller-id-number" value="$${outbound_caller_id}"/>
+      <param name="comfort-noise" value="false"/>
+      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
+      <param name="video-auto-floor-msec" value="1000"/>
+      <param name="video-mode" value="mux"/>
+      <param name="video-layout-name" value="3x3"/>
+      <param name="video-layout-name" value="group:grid"/>
+      <param name="video-canvas-size" value="640x480"/>
+      <param name="video-canvas-bgcolor" value="#333333"/>
+      <param name="video-layout-bgcolor" value="#000000"/>
+      <param name="video-codec-bandwidth" value="3mb"/>
+      <param name="video-fps" value="30"/>
+    </profile>
+
+    <profile name="video-mcu-stereo-320">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="48000"/>
+      <param name="channels" value="2"/>
+      <param name="interval" value="20"/>
+      <param name="energy-level" value="200"/>
+      <!-- <param name="tts-engine" value="flite"/> -->
+      <!-- <param name="tts-voice" value="kal16"/> -->
+      <param name="muted-sound" value="conference/conf-muted.wav"/>
+      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
+      <param name="alone-sound" value="conference/conf-alone.wav"/>
+      <param name="moh-sound" value="$${hold_music}"/>
+      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
+      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
+      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
+      <param name="locked-sound" value="conference/conf-locked.wav"/>
+      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
+      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
+      <param name="pin-sound" value="conference/conf-pin.wav"/>
+      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
+      <param name="caller-id-name" value="$${outbound_caller_name}"/>
+      <param name="caller-id-number" value="$${outbound_caller_id}"/>
+      <param name="comfort-noise" value="false"/>
+      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
+      <param name="video-auto-floor-msec" value="1000"/>
+      <param name="video-mode" value="mux"/>
+      <param name="video-layout-name" value="3x3"/>
+      <param name="video-layout-name" value="group:grid"/>
+      <param name="video-canvas-size" value="480x320"/>
+      <param name="video-canvas-bgcolor" value="#333333"/>
+      <param name="video-layout-bgcolor" value="#000000"/>
+      <param name="video-codec-bandwidth" value="3mb"/>
+      <param name="video-fps" value="30"/>
+    </profile>
+
+    <profile name="sla">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="16000"/>
+      <param name="interval" value="20"/>
+      <param name="caller-controls" value="none"/>
+      <param name="energy-level" value="200"/>
+      <param name="moh-sound" value="silence"/>
+        <param name="comfort-noise" value="true"/>
+        </profile>
+
+        </profiles>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("conference", "conference", _content)
 
     def _callcenter_conf(self):
         _content = """
@@ -511,8 +891,10 @@ class FreeSwitchXmlCurl(http.Controller):
         _content = _content.replace("{{agents}}", _agents)
         _content = _content.replace("{{tiers}}", _tiers)
 
-        _logger.info(">>>>>>>>CALLCENTER<<<<<<<<<<< %s" % _content)
-        return _CONFIGURATION_XML_TEMPLATE % ("callcenter", "callcenter", _content)
+
+        _xml = _CONFIGURATION_XML_TEMPLATE % ("callcenter", "callcenter", _content)
+        _logger.info(">>>>>>>>CALLCENTER<<<<<<<<<<< %s" % _xml)
+        return _xml
 
     def _acl_conf(self):
         _content = """
@@ -626,7 +1008,541 @@ class FreeSwitchXmlCurl(http.Controller):
         _user_xml = self._directory_user_template(_user, _res_user.sip_password)
         _directory_xml = self._directory_directory_template(_domain, _user_xml)
         return _directory_xml
+
+    def _voicemail_conf(self):
+        _content = """
+        <settings>
+        </settings>
+        <profiles>
+        <profile name="default">
+        <param name="file-extension" value="wav"/>
+        <param name="terminator-key" value="#"/>
+        <param name="max-login-attempts" value="3"/>
+        <param name="digit-timeout" value="10000"/>
+        <param name="min-record-len" value="3"/>
+        <param name="max-record-len" value="300"/>
+        <param name="max-retries" value="3"/>
+        <param name="tone-spec" value="%(1000, 0, 640)"/>
+        <param name="callback-dialplan" value="XML"/>
+        <param name="callback-context" value="default"/>
+        <param name="play-new-messages-key" value="1"/>
+        <param name="play-saved-messages-key" value="2"/>
+        <!-- play-new-messages-lifo and play-saved-messages-lifo default is false, playing oldest messages first
+	<param name="play-new-messages-lifo" value="false"/>
+	<param name="play-saved-messages-lifo" value="false"/>
+        -->
+        <param name="login-keys" value="0"/>
+        <param name="main-menu-key" value="0"/>
+        <param name="config-menu-key" value="5"/>
+        <param name="record-greeting-key" value="1"/>
+        <param name="choose-greeting-key" value="2"/>
+        <param name="change-pass-key" value="6"/>
+        <param name="record-name-key" value="3"/>
+        <param name="record-file-key" value="3"/>
+        <param name="listen-file-key" value="1"/>
+        <param name="save-file-key" value="2"/>
+        <param name="delete-file-key" value="7"/>
+        <param name="undelete-file-key" value="8"/>
+        <param name="email-key" value="4"/>
+        <param name="pause-key" value="0"/>
+        <param name="restart-key" value="1"/>
+        <param name="ff-key" value="6"/>
+        <param name="rew-key" value="4"/>
+        <param name="skip-greet-key" value="#"/>
+        <param name="previous-message-key" value="1"/>
+        <param name="next-message-key" value="3"/>
+        <param name="skip-info-key" value="*"/>
+        <param name="repeat-message-key" value="0"/>
+        <param name="record-silence-threshold" value="200"/>
+        <param name="record-silence-hits" value="2"/>
+        <param name="web-template-file" value="web-vm.tpl"/>
+        <param name="db-password-override" value="false"/>
+        <param name="allow-empty-password-auth" value="true"/>
+        <!-- if you need to change the sample rate of the recorded files e.g. gmail voicemail player -->
+        <!--<param name="record-sample-rate" value="11025"/>-->
+        <!-- the next two both must be set for this to be enabled
+        the extension is in the format of <dest> [<dialplan>] [<context>]
+        -->
+        <param name="operator-extension" value="operator XML default"/>
+        <param name="operator-key" value="9"/>
+        <param name="vmain-extension" value="vmain XML default"/>
+        <param name="vmain-key" value="*"/>
+        <!-- playback created files as soon as they were recorded by default -->
+        <!--<param name="auto-playback-recordings" value="true"/>-->
+        <email>
+	<param name="template-file" value="voicemail.tpl"/>
+	<param name="notify-template-file" value="notify-voicemail.tpl"/>
+	<!-- this is the format voicemail_time will have -->
+        <param name="date-fmt" value="%A, %B %d %Y, %I %M %p"/>
+        <param name="email-from" value="${voicemail_account}@${voicemail_domain}"/>
+        </email>
+        <!--<param name="storage-dir" value="$${storage_dir}"/>-->
+        <!--<param name="odbc-dsn" value="dsn:user:pass"/>-->
+        <!--<param name="record-comment" value="Your Comment"/>-->
+        <!--<param name="record-title" value="Your Title"/>-->
+        <!--<param name="record-copyright" value="Your Copyright"/>-->
+        </profile>
+        </profiles>
+        """
+        _xml = _CONFIGURATION_XML_TEMPLATE % ("voicemail", "voicemail", _content)
+        return _xml
+
+    def _loopback_conf(self):
+        _content = ""
+        _xml = _CONFIGURATION_XML_TEMPLATE % ("loopback", "loopback", _content)
+        return _xml
+
+    def _post_load_modules_conf(self):
+        _content = "<modules></modules>"
+        _xml = _CONFIGURATION_XML_TEMPLATE % ("loopback", "loopback", _content)
+        return _xml
+
+    def _switch_conf(self):
+        _content = """
+        <cli-keybindings>
+        <key name="1" value="help"/>
+        <key name="2" value="status"/>
+        <key name="3" value="show channels"/>
+        <key name="4" value="show calls"/>
+        <key name="5" value="sofia status"/>
+        <key name="6" value="reloadxml"/>
+        <key name="7" value="console loglevel 0"/>
+        <key name="8" value="console loglevel 7"/>
+        <key name="9" value="sofia status profile internal"/>
+        <key name="10" value="sofia profile internal siptrace on"/>
+        <key name="11" value="sofia profile internal siptrace off"/>
+        <key name="12" value="version"/>
+        </cli-keybindings> 
+  
+        <default-ptimes>
+        
+        </default-ptimes>
+  
+        <settings>
+        <param name="colorize-console" value="true"/>
+
+        <param name="dialplan-timestamps" value="false"/>
+
+        <!-- <param name="1ms-timer" value="true"/> -->
+        <!-- <param name="switchname" value="freeswitch"/> -->
+        <!-- <param name="cpu-idle-smoothing-depth" value="30"/> -->
+
+
+        <!-- Maximum number of simultaneous DB handles open -->
+        <param name="max-db-handles" value="50"/>
+        <!-- Maximum number of seconds to wait for a new DB handle before failing -->
+        <param name="db-handle-timeout" value="10"/>
+
+        <!-- Minimum idle CPU before refusing calls -->
+        <!-- <param name="min-idle-cpu" value="25"/> -->
+
+        <!-- Interval between heartbeat events -->
+        <!-- <param name="event-heartbeat-interval" value="20"/> -->
+
+        <!--
+	Max number of sessions to allow at any given time.
+	
+	NOTICE: If you're driving 28 T1's in a single box you should set this to 644*2 or 1288
+	this will ensure you're able to use the entire DS3 without a problem.  Otherwise you'll
+	be 144 channels short of always filling that DS3 up which can translate into waste.
+        -->
+        <param name="max-sessions" value="1000"/>
+
+        <!--Most channels to create per second -->
+        <param name="sessions-per-second" value="30"/>
+        <!-- Default Global Log Level - value is one of debug,info,notice,warning,err,crit,alert -->
+        <param name="loglevel" value="debug"/>
+
+        <!-- Set the core DEBUG level (0-10) -->
+        <!-- <param name="debug-level" value="10"/> -->
+
+        <!-- <param name="sql-buffer-len" value="1m"/> -->
+        <!-- <param name="max-sql-buffer-len" value="2m"/> -->        
+        <!-- <param name="min-dtmf-duration" value="400"/> -->
+        
+        <!-- <param name="max-dtmf-duration" value="192000"/> -->
+        
+        <!-- <param name="default-dtmf-duration" value="2000"/> -->
+        
+        <param name="mailer-app" value="sendmail"/>
+        <param name="mailer-app-args" value="-t"/>
+        <param name="dump-cores" value="yes"/>
+
+        <!-- <param name="verbose-channel-events" value="no"/> -->
+        
+        <!-- Enable clock nanosleep -->
+        <!-- <param name="enable-clock-nanosleep" value="true"/> -->
+        
+        <!-- Enable monotonic timing -->
+        <!-- <param name="enable-monotonic-timing" value="true"/> -->
+        
+        <!-- NEEDS DOCUMENTATION -->
+        <!-- <param name="enable-softtimer-timerfd" value="true"/> -->
+        <!-- <param name="enable-cond-yield" value="true"/> -->
+        <!-- <param name="enable-timer-matrix" value="true"/> -->
+        <!-- <param name="threaded-system-exec" value="true"/> -->
+        <!-- <param name="tipping-point" value="0"/> -->
+        <!-- <param name="timer-affinity" value="disabled"/> -->
+        <!-- NEEDS DOCUMENTATION -->
+        
+        <!-- RTP port range -->
+        <!-- <param name="rtp-start-port" value="16384"/> -->
+        <!-- <param name="rtp-end-port" value="32768"/> -->
+        
+        <!-- Test each port to make sure it is not in use by some other process before allocating it to RTP -->
+        <!-- <param name="rtp-port-usage-robustness" value="true"/> -->
+        
+        <param name="rtp-enable-zrtp" value="false"/>
+        
+        <!-- <param name="rtp-retain-crypto-keys" value="true"/> -->
+        <!-- <param name="core-db-name" value="/dev/shm/core.db" /> -->
+                
+        <!-- Allow multiple registrations to the same account in the central registration table -->
+        <!-- <param name="multiple-registrations" value="true"/> -->
+        
+        <!-- <param name="max-audio-channels" value="2"/> -->
+        
+        </settings>
+        """
+        _xml = _CONFIGURATION_XML_TEMPLATE % ("switch", "switch", _content)
+        return _xml
+        
+    def _local_stream_conf(self):
+        _content = """
+        <!-- fallback to default if requested moh class isn't found -->
+        <directory name="default" path="$${sounds_dir}/music/8000">
+        <param name="rate" value="8000"/>
+        <param name="shuffle" value="true"/>
+        <param name="channels" value="1"/>
+        <param name="interval" value="20"/>
+        <param name="timer-name" value="soft"/>
+        <!-- list of short files to break in with every so often -->
+        <!--<param name="chime-list" value="file1.wav,file2.wav"/>-->
+        <!-- frequency of break-in (seconds)-->
+        <!--<param name="chime-freq" value="30"/>-->
+        <!-- limit to how many seconds the file will play -->
+        <!--<param name="chime-max" value="500"/>-->
+        </directory>
+        
+        <directory name="moh/8000" path="$${sounds_dir}/music/8000">
+        <param name="rate" value="8000"/>
+        <param name="shuffle" value="true"/>
+        <param name="channels" value="1"/>
+        <param name="interval" value="20"/>
+        <param name="timer-name" value="soft"/>
+        </directory>
+        
+        <directory name="moh/16000" path="$${sounds_dir}/music/16000">
+        <param name="rate" value="16000"/>
+        <param name="shuffle" value="true"/>
+        <param name="channels" value="1"/>
+        <param name="interval" value="20"/>
+        <param name="timer-name" value="soft"/>
+        </directory>
+        
+        <directory name="moh/32000" path="$${sounds_dir}/music/32000">
+        <param name="rate" value="32000"/>
+        <param name="shuffle" value="true"/>
+        <param name="channels" value="1"/>
+        <param name="interval" value="20"/>
+        <param name="timer-name" value="soft"/>
+        </directory>
+        
+        <directory name="moh/48000" path="$${sounds_dir}/music/48000">
+        <param name="rate" value="48000"/>
+        <param name="shuffle" value="true"/>
+        <param name="channels" value="1"/>
+        <param name="interval" value="10"/>
+        <param name="timer-name" value="soft"/>
+        </directory>
+        
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("local_stream", "local_stream", _content)
+
+    def _sndfile_conf(self):
+        _content = """
+	<settings>      
+	<param name="allowed-extensions" value="wav,raw,r8,r16"/>
+	</settings>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("sndfile", "sndfile", _content)
+
+    def _shout_conf(self):
+        _content = """
+        <settings>
+        <!-- Don't change these unless you are insane -->
+        <!--<param name="decoder" value="i586"/>-->
+        <!--<param name="volume" value=".1"/>-->
+        <!--<param name="outscale" value="8192"/>-->
+        </settings>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("shout", "shout", _content)
+
+    def _spandsp_conf(self):
+        _content = """
+        <modem-settings>
+        
+        <param name="total-modems" value="0"/>
+        <param name="context" value="default"/>
+        <param name="dialplan" value="XML"/>
+
+        <!-- Extra tracing for debugging -->
+        <param name="verbose" value="false"/>
+        </modem-settings>
+
+        <fax-settings>
+	<param name="use-ecm"		value="true"/>
+	<param name="verbose"		value="false"/>
+	<!--param name="verbose-log-level"	value="INFO"/-->
+	<param name="disable-v17"	value="false"/>
+	<param name="ident"		value="SpanDSP Fax Ident"/>
+	<param name="header"		value="SpanDSP Fax Header"/>
+
+	<param name="spool-dir"		value="$${temp_dir}"/>
+	<param name="file-prefix"	value="faxrx"/>
+	<!-- How many packets to process before sending the re-invite on tx/rx -->
+	<!-- <param name="t38-rx-reinvite-packet-count" value="50"/> -->
+	<!-- <param name="t38-tx-reinvite-packet-count" value="100"/> -->
+        </fax-settings>
+
+        <descriptors>
+
+        <!-- North America -->
+        <descriptor name="1">
+        <tone name="CED_TONE">
+        <element freq1="2100" freq2="0" min="700" max="0"/>
+        </tone>
+        <tone name="SIT">
+        <element freq1="950" freq2="0" min="256" max="400"/>
+        <element freq1="1400" freq2="0" min="256" max="400"/>
+        <element freq1="1800" freq2="0" min="256" max="400"/>
+        </tone>
+        <tone name="RING_TONE" description="North America ring">
+        <element freq1="440" freq2="480" min="1200" max="0"/>
+       </tone>
+        <tone name="REORDER_TONE">
+        <element freq1="480" freq2="620" min="224" max="316"/>
+        <element freq1="0" freq2="0" min="168" max="352"/>
+        <element freq1="480" freq2="620" min="224" max="316"/>
+        </tone>
+        <tone name="BUSY_TONE">
+        <element freq1="480" freq2="620" min="464" max="536"/>
+        <element freq1="0" freq2="0" min="464" max="572"/>
+        <element freq1="480" freq2="620" min="464" max="536"/>
+        </tone>
+        </descriptor>
+        
+        <!-- United Kingdom -->
+        <descriptor name="44">
+        <tone name="CED_TONE">
+        <element freq1="2100" freq2="0" min="500" max="0"/>
+        </tone>
+        <tone name="SIT">
+        <element freq1="950" freq2="0" min="256" max="400"/>
+        <element freq1="1400" freq2="0" min="256" max="400"/>
+        <element freq1="1800" freq2="0" min="256" max="400"/>
+        </tone>
+        <tone name="REORDER_TONE">
+        <element freq1="400" freq2="0" min="368" max="416"/>
+        <element freq1="0" freq2="0" min="336" max="368"/>
+        <element freq1="400" freq2="0" min="256" max="288"/>
+        <element freq1="0" freq2="0" min="512" max="544"/>
+        </tone>
+        <tone name="BUSY_TONE">
+        <element freq1="400" freq2="0" min="352" max="384"/>
+        <element freq1="0" freq2="0" min="352" max="384"/>
+        <element freq1="400" freq2="0" min="352" max="384"/>
+        <element freq1="0" freq2="0" min="352" max="384"/>
+        </tone>
+        </descriptor>
+        
+        <!-- Germany -->
+        <descriptor name="49">
+        <tone name="CED_TONE">
+        <element freq1="2100" freq2="0" min="500" max="0"/>
+        </tone>
+        <tone name="SIT">
+        <element freq1="900" freq2="0" min="256" max="400"/>
+        <element freq1="1400" freq2="0" min="256" max="400"/>
+        <element freq1="1800" freq2="0" min="256" max="400"/>
+        </tone>
+        <tone name="REORDER_TONE">
+        <element freq1="425" freq2="0" min="224" max="272"/>
+        <element freq1="0" freq2="0" min="224" max="272"/>
+        </tone>
+        <tone name="BUSY_TONE">
+        <element freq1="425" freq2="0" min="464" max="516"/>
+        <element freq1="0" freq2="0" min="464" max="516"/>
+        </tone>
+        </descriptor>
+        </descriptors>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("spandsp", "spandsp", _content)
+
+    def _opus_conf(self):
+        _content = """
+        <settings>
+        <param name="use-vbr" value="1"/>
+        <!--<param name="use-dtx" value="1"/>-->
+        <param name="complexity" value="10"/>
+	<!-- Set the initial packet loss percentage 0-100 -->
+        <!--<param name="packet-loss-percent" value="10"/>-->
+	<!-- Support asymmetric sample rates -->
+        <!--<param name="asymmetric-sample-rates" value="1"/>-->
+
+	<!-- Enable bitrate negotiation -->
+        <!--<param name="bitrate-negotiation" value="1"/>-->
+
+	<!-- Keep FEC Enabled -->
+        <param name="keep-fec-enabled" value="1"/>
+	<!--<param name="use-jb-lookahead" value="true"/> -->
+        <!--
+           maxaveragebitrate: the maximum average codec bitrate (values: 6000 to 510000 in bps) 0 is not considered
+           maxplaybackrate: the maximum codec internal frequency (values: 8000, 12000, 16000, 24000, 48000 in Hz) 0 is not considered
+           This will set the local encoder and instruct the remote encoder trough specific "fmtp" attibute in the SDP.
+
+           Example: if you receive "maxaveragebitrate=20000" from SDP and you have set "maxaveragebitrate=24000" in this configuration
+                    the lowest will prevail in this case "20000" is set on the encoder and the corresponding fmtp attribute will be set
+                    to instruct the remote encoder to do the same.
+        -->
+        <param name="maxaveragebitrate" value="0"/>
+        <param name="maxplaybackrate" value="0"/>
+	<!-- Max capture rate, 8000, 12000, 16000, 24000 and 48000 are valid options -->
+        <!--<param name="sprop-maxcapturerate" value="0"/>-->
+	<!-- Enable automatic bitrate variation during the call based on RTCP feedback -->
+	<!--<param name="adjust-bitrate" value="1"/>-->
+	<!-- will enforce mono even if the remote party wants stereo. must be used in conjunction with param "max-audio-channels" set to 1 in switch.conf.xml. -->
+		<param name="mono" value="0"/>
+        </settings>
+        
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("opus", "opus", _content)
+
+    def _amr_conf(self):
+        _content = """
+	<settings>
+	<!-- AMR modes (supported bitrates) :
+        mode   0     AMR 4.75  kbps
+        mode   1     AMR 5.15  kbps
+        mode   2     AMR 5.9 kbps
+        mode   3     AMR 6.7 kbps
+        mode   4     AMR 7.4  kbps
+        mode   5     AMR 7.95 kbps 
+        mode   6     AMR 10.2 kbps 
+        mode   7     AMR 12.2 kbps
+        -->
+	<param name="default-bitrate" value="7"/> 
+	<!-- Enable VoLTE specific FMTP -->
+	<param name="volte" value="0"/>
+	<!-- Enable automatic bitrate variation during the call based on RTCP feedback -->
+	<param name="adjust-bitrate" value="0"/> 
+	<!-- force OA when originating -->
+	<param name="force-oa" value="0"/> 
+	</settings>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("amr", "amr", _content)        
+
+    def _hash_conf(self):
+        _content = """
+        <remotes>
+        </remotes>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("hash", "hash", _content)        
+
+    def _fifo_conf(self):
+        _content = """
+        <settings>
+        <param name="delete-all-outbound-member-on-startup" value="false"/>
+        </settings>
+        <fifos>
+        <fifo name="cool_fifo@$${domain}" importance="0">
+        <!--<member timeout="60" simo="1" lag="20">{member_wait=nowait}user/1005@$${domain}</member>-->
+        </fifo>
+        </fifos>
+
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("fifo", "fifo", _content)        
     
+    def _db_conf(self):
+        _content = """
+        <settings>
+        <!--<param name="odbc-dsn" value="dsn:user:pass"/>-->
+        </settings>
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("db", "db", _content)
+        
+    # def _timezones_conf(self):
+    #     _path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../freeswitch/conf/timezones.conf.xml")
+    #     with open(_path, "r") as _file:
+    #         _content = _file.read(_content)
+    #     return _content
+
+    def _verto_conf(self):
+        _content = """
+          <settings>
+    <param name="debug" value="0"/>
+    <!-- <param name="kslog" value="true"/> -->
+    <!-- seconds to wait before hanging up a disconnected channel -->
+    <!-- <param name="detach-timeout-sec" value="120"/> -->
+    <!-- enable broadcasting all FreeSWITCH events in Verto -->
+    <!-- <param name="enable-fs-events" value="false"/> -->
+    <!-- enable broadcasting FreeSWITCH presence events in Verto -->
+    <!-- <param name="enable-presence" value="true"/> -->
+  </settings>
+
+  <profiles>
+    <profile name="default-v4">
+      <param name="bind-local" value="$${local_ip_v4}:8081"/>
+      <param name="bind-local" value="$${local_ip_v4}:8082" secure="true"/>
+      <param name="force-register-domain" value="$${domain}"/>
+      <param name="secure-combined" value="$${certs_dir}/wss.pem"/>
+      <param name="secure-chain" value="$${certs_dir}/wss.pem"/>
+      <param name="userauth" value="true"/>
+      <!-- setting this to true will allow anyone to register even with no account so use with care -->
+      <param name="blind-reg" value="false"/>
+      <param name="mcast-ip" value="224.1.1.1"/>
+      <param name="mcast-port" value="1337"/>
+      <param name="rtp-ip" value="$${local_ip_v4}"/>
+      <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
+      <param name="local-network" value="localnet.auto"/>
+      <param name="outbound-codec-string" value="opus,h264,vp8"/>
+      <param name="inbound-codec-string" value="opus,h264,vp8"/>
+
+      <param name="apply-candidate-acl" value="localnet.auto"/>
+      <param name="apply-candidate-acl" value="wan_v4.auto"/>
+      <param name="apply-candidate-acl" value="rfc1918.auto"/>
+      <param name="apply-candidate-acl" value="any_v4.auto"/>
+      <param name="timer-name" value="soft"/>
+      
+    </profile>
+
+    <profile name="default-v6">
+      <param name="bind-local" value="[$${local_ip_v6}]:8081"/>
+      <param name="bind-local" value="[$${local_ip_v6}]:8082" secure="true"/>
+      <param name="force-register-domain" value="$${domain}"/>
+      <param name="secure-combined" value="$${certs_dir}/wss.pem"/>
+      <param name="secure-chain" value="$${certs_dir}/wss.pem"/>
+      <param name="userauth" value="true"/>
+      <!-- setting this to true will allow anyone to register even with no account so use with care -->
+      <param name="blind-reg" value="false"/>
+      <param name="rtp-ip" value="$${local_ip_v6}"/>
+      <!--  <param name="ext-rtp-ip" value=""/> -->
+      <param name="outbound-codec-string" value="opus,h264,vp8"/>
+      <param name="inbound-codec-string" value="opus,h264,vp8"/>
+
+      <param name="apply-candidate-acl" value="wan_v6.auto"/>
+      <param name="apply-candidate-acl" value="rfc1918.auto"/>
+      <param name="apply-candidate-acl" value="any_v6.auto"/>
+      <param name="apply-candidate-acl" value="wan_v4.auto"/>
+      <param name="apply-candidate-acl" value="any_v4.auto"/>
+      <param name="timer-name" value="soft"/>
+      
+    </profile>
+  </profiles>
+
+        """
+        return _CONFIGURATION_XML_TEMPLATE % ("verto", "verto", _content)
+        
     @http.route('/freeswitch_xml_curl/configuration', type='http', auth='none', csrf=False)
     def configuration(self, *args, **kw):
         _logger.info("Configuration: [%s]" % http.request.params)
@@ -656,46 +1572,49 @@ class FreeSwitchXmlCurl(http.Controller):
             return self._acl_conf()
 
         if self._is_key_value("voicemail.conf"):
-            return _EMPTY_XML
+            return self._voicemail_conf()
 
         if self._is_key_value("loopback.conf"):
-            return _EMPTY_XML
+            return self._loopback_conf()
 
         if self._is_key_value("post_load_modules.conf"):
-            return _EMPTY_XML
+            return self._post_load_modules_conf()
 
-        if self._is_key_value("post_load_switch.conf"):
-            return _EMPTY_XML
+        if self._is_key_value("switch.conf"):
+            return self._switch_conf()
 
         if self._is_key_value("local_stream.conf"):
-            return _EMPTY_XML
+            return self._local_stream_conf()
 
         if self._is_key_value("shout.conf"):
-            return _EMPTY_XML
+            return self._shout_conf()
 
         if self._is_key_value("sndfile.conf"):
-            return _EMPTY_XML
+            return self._sndfile_conf()
 
         if self._is_key_value("opus.conf"):
-            return _EMPTY_XML
+            return self._opus_conf()
 
         if self._is_key_value("spandsp.conf"):
-            return _EMPTY_XML
+            return self._spandsp_conf()
 
         if self._is_key_value("amr.conf"):
-            return _EMPTY_XML
-
-        if self._is_key_value("httapi.conf"):
-            return _EMPTY_XML
+            return self._amr_conf()
 
         if self._is_key_value("hash.conf"):
-            return _EMPTY_XML
+            return self._hash_conf()
 
         if self._is_key_value("fifo.conf"):
-            return _EMPTY_XML
+            return self._fifo_conf()
 
         if self._is_key_value("db.conf"):
-            return _EMPTY_XML
+            return self._db_conf()
+
+        # if self._is_key_value("timezones.conf"):
+        #     return self._timezones_conf()
+
+        if self._is_key_value("verto.conf"):
+            return self._verto_conf()
 
         _logger.error("Configuration [%s] is not recognized." % self._get_key_value())
         return _EMPTY_XML

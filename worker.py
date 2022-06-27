@@ -110,9 +110,10 @@ class CTICommandThread(threading.Thread):
             if self.is_stop:
                 self.cti_client.stop()
                 break
+            # FIXME: run two async io tasks
+            # one for database/ another for cti
             asyncio.run(self.cti_client.run_loop())
-            #_logger.info("IN CTICOMMANDTHREAD")
-            time.sleep(3)
+            time.sleep(1)
 
 class CTINotificationThread(threading.Thread):
     """

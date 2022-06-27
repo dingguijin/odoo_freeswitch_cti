@@ -20,6 +20,7 @@ class CtiEvent(models.Model):
     # if backgroup_job
     command_name = fields.Char("Command Name", required=False)
     command_id = fields.Integer("Command ID", required=False)
+    command_record = fields.Many2one("freeswitch_cti.cti_command", "Command Record", required=False)
 
     # if register/unregister/dialing/hangup/offhook
     sip_number = fields.Char("Sip Number", required=False)

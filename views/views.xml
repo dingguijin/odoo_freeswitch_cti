@@ -173,7 +173,43 @@
         </form>
       </field>
     </record>
-    
+
+    <record id="view_open_view_cti_event_form" model="ir.ui.view"> 
+      <field name="name">freeswitch_cti.cti_event.form</field>  
+      <field name="model">freeswitch_cti.cti_event</field>
+      <field eval="18" name="priority"/>
+      <field name="arch" type="xml">
+        <form string="Events">
+          <sheet>
+            <group>
+              <group>
+                <field name="name" />
+                <field name="subclass" />
+                <field name="freeswitch" />
+                <field name="content_type" />
+                <field name="content_length" />
+              </group>
+              <group>                
+                <field name="command_id" />
+                <field name="command_name" />
+                <field name="sip_number" />
+              </group>
+            </group>
+            <notebook>
+              <page string="Event Content">
+                <field name="event_content">
+                </field>
+              </page>
+              <page string="Sub Content">
+                <field name="content_content">
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <!-- Action view -->
     <!-- <record id="action_open_view_callcenter_queue_form" model="ir.actions.act_window.view"> -->
     <!--   <field eval="10" name="sequence"/> -->

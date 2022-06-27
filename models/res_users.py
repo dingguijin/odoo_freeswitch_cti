@@ -3,6 +3,7 @@
 import logging
 
 from odoo import api, fields, models, _
+from . import cti_command
 
 _logger = logging.getLogger(__name__)
 
@@ -109,8 +110,14 @@ class ResUsers(models.Model):
                 record.is_callcenter_supervisor = False
         return
 
-
     def search(self, args, offset=0, limit=None, order=None, count=False):
         self.env.add_to_compute(self._fields["is_callcenter_agent"], super().search([]))
         self.env.add_to_compute(self._fields["is_callcenter_supervisor"], super().search([]))
         return super().search(args, offset, limit, order, count)
+
+    def write(self, vals):
+        self._compute_is_callcenter_agent()
+        if self.is_callcenter_agent:
+            cti_command.send_cti_command("reload", "mod_callcenter")
+        return
+    

@@ -2,8 +2,6 @@
 
 from odoo import api, fields, models, _
 
-from . import cti_command
-
 class CallcenterTier(models.Model):
 
     _name = "freeswitch_cti.callcenter_tier"
@@ -20,7 +18,18 @@ class CallcenterTier(models.Model):
         ('tier_unique', 'UNIQUE(tier_agent_id, tier_queue_id)', 'One agent in queue one time')
     ]
 
-    def create(self, val):
-        _r = super().create(val)
-        cti_command.send_cti_command("bgapi", "callcenter queue reload")
+    @api.model
+    def create(self, vals):
+        _r = super().create(vals)
+        self.env["freeswitch_cti.cti_command"].send_cti_command("reload", "mod_callcenter")
+        return _r
+
+    def write(self, vals):
+        _r = super().write(vals)
+        self.env["freeswitch_cti.cti_command"].send_cti_command("reload", "mod_callcenter")
+        return _r
+
+    def unlink(self):
+        _r = super().unlink()
+        self.env["freeswitch_cti.cti_command"].send_cti_command("reload", "mod_callcenter")
         return _r

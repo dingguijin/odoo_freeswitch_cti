@@ -32,6 +32,8 @@ class FreeSwitchClient():
         self.bgapi_commands = collections.deque([])
         self.jobs = {}
         self.channels = {}
+
+        self._tmp_headers = {}
         return
 
     def stop(self):
@@ -51,66 +53,91 @@ class FreeSwitchClient():
 
         return
 
-    async def run_loop(self):
-
-        self.db_connection = odoo.sql_db.db_connect(self.dbname)
-        _freeswitch = self._get_freeswitch_info(self.db_connection)
-        if not _freeswitch:
-            _logger.error("No predefined freeswitch, exit CTI.")
-            return
-        
-        self.freeswitch_info = _freeswitch
-        try:
-            self.reader, self.writer = await asyncio.open_connection(_freeswitch["freeswitch_ip"], 8021)
-        except:
-            _logger.error("Can not connect freeswitch: [%s], auto restarting." % _freeswitch["freeswitch_ip"])
-            return
-        
-        _headers = {}
+    async def _run_command_loop(self):
         while True:
-
             if self.is_stop:
                 self._stop()
                 break
-
-            try:
-                _header = await asyncio.wait_for(self.reader.readline(), timeout=3.0)
-            except asyncio.TimeoutError:
-                #_logger.info(">>>>>>>>> No event to read, continue")
-                if self.client_status == "SUBSCRIBED":
-                    self._dispatch_cti_commands()
-                continue
-            
-            # _logger.info("CTIClient .............. %s", _header)            
-            if not _header:
-                self._stop()
-                break
-
-            parts = _header.split(b":")
-            if len(parts) == 2:
-                _key = urllib.parse.unquote(parts[0].strip())
-                _value = urllib.parse.unquote(parts[1].strip())
-                if _key == "Content-Length" and "Content-Length" in _headers:
-                    _key = "Content-Content-Length"
-                _headers[_key] = _value 
-
-            if _header == b"\n":
-                if self._is_break_headers(_headers):
-                    self.client_status = "NULL"
-                    break
-
-                if self._is_meta_headers(_headers):
-                    continue
-
-                #_logger.info("HEADERS %s", _headers)
-                await self._handle_headers(_headers)
-                self._log_event(_headers)
-                await self._push_event(_headers)
-                _headers = {}
-
             if self.client_status == "SUBSCRIBED":
                 self._dispatch_cti_commands()
+            await asyncio.sleep(1)
+        return
 
+    async def _parse_header(self, header):
+        _logger.info(header)
+        headers = self._tmp_headers
+        parts = header.split(b":")
+        if len(parts) == 2:
+            _key = urllib.parse.unquote(parts[0].strip())
+            _value = urllib.parse.unquote(parts[1].strip())
+            if _key == "Content-Length" and "Content-Length" in headers:
+                _key = "Content-Content-Length"
+            headers[_key] = _value 
+
+        # keep receive more headers
+        if header != b"\n":
+            return True
+
+        # freeswitch closed
+        if self._is_break_headers(headers):
+            self._tmp_headers = {}
+            return False
+
+        # keep receive more headers
+        if self._is_meta_headers(headers):
+            return True
+        
+        _logger.info("HEADERS %s", headers)
+        await self._handle_headers(headers)
+        self._log_event(headers)
+        await self._push_event(headers)
+        self._tmp_headers = {}
+        return True
+
+    async def _run_cti_loop(self):
+        while True:
+            if self.is_stop:
+                self._stop()
+                return
+            try:
+                self.reader, self.writer = await asyncio.open_connection(self.freeswitch_info["freeswitch_ip"], 8021)
+            except:
+                _logger.error("Disconnect: [%s], restart in 5 seconds." % self.freeswitch_info["freeswitch_ip"])
+                await asyncio.sleep(5)
+                continue
+
+            _logger.info("FreeSWITCH: [%s] online" % self.freeswitch_info["freeswitch_ip"])
+            
+            self.client_status = "NULL"
+            while True:
+                if self.is_stop:
+                    self._stop()
+                    return
+                try:
+                    _timeout = 10
+                    _header = await asyncio.wait_for(self.reader.readline(), timeout=_timeout)
+                except asyncio.TimeoutError:
+                    _logger.error("In [%d] seconds, no event, reconnect" % _timeout)
+                    break
+            
+                if not _header:
+                    break
+
+                if not await self._parse_header(_header):
+                    break
+        return
+    
+    async def run_loop(self):
+        self.db_connection = odoo.sql_db.db_connect(self.dbname)
+        _freeswitch = self._get_freeswitch_info(self.db_connection)
+        if not _freeswitch:
+            _logger.error("No freeswitch, exit CTI.")
+            return
+        
+        self.freeswitch_info = _freeswitch
+        
+        await asyncio.gather(self._run_command_loop(),
+                             self._run_cti_loop())
         return
     
     def _is_meta_headers(self, headers):
@@ -323,7 +350,7 @@ class FreeSwitchClient():
         _command = self.jobs.get(_job_uuid)
         if not _command:
             _logger.error("No job for uuid: [%s]" % _job_uuid)
-            #_logger.info(headers)
+            _logger.info(headers)
             return    
         _content_content = headers.get("Content-Content") or ""
         self._update_cti_command_status(_command["cti_command_id"],
@@ -335,10 +362,19 @@ class FreeSwitchClient():
     def _handle_event_func_API(self, headers):
         return
 
-    def _send_bgapi_command(self, command, record_id):
+    def _send_bgapi_command(self, command, parameter, record_id):
         self.bgapi_commands.append({"cti_command": command,
+                                    "cti_parameter": parameter,
                                     "cti_command_id": record_id})
-        _cmd = "bgapi %s" % command
+        _cmd = "bgapi %s %s" % (command, parameter)
+        self._send_cmd(_cmd)
+        return
+
+    def _send_json_command(self, command, parameter, record_id):
+        self.bgapi_commands.append({"cti_command": command,
+                                    "cti_parameter": parameter,
+                                    "cti_command_id": record_id})
+        _cmd = "bgapi json %s" % {"command": command, "data": {"arguments": parameter}}
         self._send_cmd(_cmd)
         return
     
@@ -347,7 +383,7 @@ class FreeSwitchClient():
     #     return
     
     def _is_ignored_event(self, headers):
-        _ignore_events = ["RE_SCHEDULE"]
+        _ignore_events = ["RE_SCHEDULE", "MODULE_UNLOAD"]
         _event_name = headers.get("Event-Name")
         if _event_name in _ignore_events:
             return True
@@ -372,9 +408,13 @@ class FreeSwitchClient():
         
     def _send_cti_commands(self, commands):
         for _command in commands:
+            _id = _command["id"]
+            _name = _command["name"]
             _parameter = _command.get("parameter") or ""
-            _cti_command = "%s %s" % (_command["name"], _parameter)
-            self._send_bgapi_command(_cti_command, _command["id"])
+            if _name.startswith("callcenter"):
+                self._send_json_command(_name, _parameter, _id)
+            else:
+                self._send_bgapi_command(_name, _parameter, _id)
         return
     
     def _send_interest_events(self):
@@ -439,12 +479,17 @@ class FreeSwitchClient():
             """ % self.freeswitch_info["id"])
             cr.commit()
         return
-        
-    def _log_event(self, headers):
-        _do_not_log = ["RE_SCHEDULE", "HEARTBEAT"]
-        if headers.get("Event-Name") in _do_not_log:
-            return
 
+    def _is_ignored_event_for_log(self, headers):
+        _do_not_log = ["RE_SCHEDULE", "HEARTBEAT", "MODULE_UNLOAD"]
+        if headers.get("Event-Name") in _do_not_log:
+            return True
+        return False
+
+    def _log_event(self, headers):
+        if self._is_ignored_event_for_log(headers):
+            return        
+        _command = headers.get("Job-Command") or headers.get("API-Command") or ""
         with self.db_connection.cursor() as cr:
             _r = cr.execute("""
             INSERT into freeswitch_cti_cti_event
@@ -457,16 +502,15 @@ class FreeSwitchClient():
                   headers.get("Content-Content") or "",
                   json.dumps(headers),
                   headers.get("Event-Subclass") or "",
-                  headers.get("Job-Command") or ""))
+                  _command))
             _r = cr.fetchone()
             headers.update({"cti_event_id": _r})
         return
 
     async def _push_event(self, headers):
-        _do_not_push = ["RE_SCHEDULE", "HEARTBEAT"]
-        if headers.get("Event-Name") in _do_not_push:
+        if self._is_ignored_event_for_log(headers):
             return
-        
+
         async with aiohttp.ClientSession() as session:
             _event_url = "http://localhost:8069/web/cti_event/%d" % headers.get("cti_event_id")
             async with session.get(_event_url) as resp:
