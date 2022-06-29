@@ -9,6 +9,8 @@ class CtiCallFlow(models.Model):
     _description = "Cti CallFlow"
 
     # same with profile_index
+
+    cdr_id = fields.Many2one('freeswitch_cti.cti_cdr', 'Cdr')
     name = fields.Char('Name', compute="_compute_name")
     profile_index = fields.Integer('Profile Index')
     
@@ -32,7 +34,7 @@ class CtiCallFlow(models.Model):
     times_resurrect_time = fields.Datetime("Resurrect Time")
     times_transfer_time = fields.Datetime("Transfer Time")
 
-    @depends("profile_index")
+    @api.depends("profile_index")
     def _compute_name(self):
         for record in self:
             record.name = "callflow_%d" % record.profile_index

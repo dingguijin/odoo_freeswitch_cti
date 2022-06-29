@@ -111,6 +111,7 @@ class ResUsers(models.Model):
         return
 
     def search(self, args, offset=0, limit=None, order=None, count=False):
+        _logger.info("search .... %s", args)
         self.env.add_to_compute(self._fields["is_callcenter_agent"], super().search([]))
         self.env.add_to_compute(self._fields["is_callcenter_supervisor"], super().search([]))
         return super().search(args, offset, limit, order, count)
