@@ -64,7 +64,6 @@ class FreeSwitchClient():
         return
 
     async def _parse_header(self, header):
-        _logger.info(header)
         headers = self._tmp_headers
         parts = header.split(b":")
         if len(parts) == 2:
@@ -87,7 +86,7 @@ class FreeSwitchClient():
         if self._is_meta_headers(headers):
             return True
         
-        _logger.info("HEADERS %s", headers)
+        # _logger.info("%s", headers)
         await self._handle_headers(headers)
         self._log_event(headers)
         await self._push_event(headers)
@@ -102,7 +101,7 @@ class FreeSwitchClient():
             try:
                 self.reader, self.writer = await asyncio.open_connection(self.freeswitch_info["freeswitch_ip"], 8021)
             except:
-                _logger.error("Disconnect: [%s], restart in 5 seconds." % self.freeswitch_info["freeswitch_ip"])
+                _logger.warning("Disconnect: [%s], auto reconnect in 5 seconds." % self.freeswitch_info["freeswitch_ip"])
                 await asyncio.sleep(5)
                 continue
 
@@ -114,7 +113,7 @@ class FreeSwitchClient():
                     self._stop()
                     return
                 try:
-                    _timeout = 10
+                    _timeout = 30
                     _header = await asyncio.wait_for(self.reader.readline(), timeout=_timeout)
                 except asyncio.TimeoutError:
                     _logger.error("In [%d] seconds, no event, reconnect" % _timeout)
@@ -742,15 +741,18 @@ class FreeSwitchClient():
     def _update_sip_phone_answer(self, headers):
         _uuid = headers.get("Unique-ID")
         _sip_number = self._get_sip_number_from_channel_map(_uuid)
+        if not _sip_number:
+            return
         self._update_sip_phone_status(_sip_number, "talking")
         return
 
     def _update_sip_phone_channel_create(self, headers):
         _uuid = headers.get("Unique-ID")
         _sip_number = self._get_sip_number_from_channel_map(_uuid)
-
+        if not _sip_number:
+            return
+        
         _call_direction = self.channels[_uuid]["call_direction"]
-
         _status = "calling"
         if _call_direction == "outbound":
             _status = "ringing"
@@ -760,6 +762,8 @@ class FreeSwitchClient():
     def _update_sip_phone_hangup(self, headers):
         _uuid = headers.get("Unique-ID")
         _sip_number = self._get_sip_number_from_channel_map(_uuid)
+        if not _sip_number:
+            return
         self._update_sip_phone_status(_sip_number, "hangup")
         return
 
@@ -771,10 +775,12 @@ class FreeSwitchClient():
     def _get_sip_number_from_channel_map(self, _uuid):
         # inbound/outbound is from FreeSwitch' point of view.
         # not real world meaning.
+
+        # caller_id / called_id may be None since phone not registered.
         _channel = self.channels[_uuid]
         if _channel["call_direction"] == "inbound":
-            return _channel["caller_id"]
-        return _channel["called_id"]
+            return _channel.get("caller_id")
+        return _channel.get("called_id")
 
     def _update_sip_phone_status(self, sip_number, status):
         with self.db_connection.cursor() as cr:

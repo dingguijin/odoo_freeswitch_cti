@@ -144,18 +144,26 @@ class FreeSwitchXmlCurl(http.Controller):
         _logger.error("Freeswitch name not matched, expect %s, but %s" % (_ss[0].get("freeswitch_hostname"), http.request.params.get("hostname")))
         return False
 
-    def _xml_cdr_conf(self):
+    def _json_cdr_conf(self):
         _content = """
         <settings>
-        <param name="url" value="http://127.0.0.1:8069/freeswitch_xml_cdr"/>
-        <param name="retries" value="2"/>
-        <param name="delay" value="120"/>
-        <param name="log-dir" value="/var/log/cdr"/>
-        <param name="err-log-dir" value="/var/log/cdr/errors"/>
-        <param name="encode" value="True"/>
+        <param name="log-b-leg" value="true"/>
+        <param name="prefix-a-leg" value="false"/>
+        <param name="encode-values" value="true"/>
+        <param name="log-http-and-disk" value="false"/>
+        <param name="log-dir" value=""/>
+        <param name="rotate" value="false"/>
+        <param name="url" value="http://192.168.50.121:8069/freeswitch_json_cdr"/>
+        <param name="auth-scheme" value="basic"/>
+        <param name="cred" value=""/>
+        <param name="encode" value="base64|true|false"/>
+        <param name="retries" value="0"/>
+        <param name="delay" value="5000"/>
+        <param name="disable-100-continue" value="false"/>
+        <param name="err-log-dir" value="" />
         </settings>
         """
-        _xml = _CONFIGURATION_XML_TEMPLATE % ("xml_cdr", "xml_cdr", _content)
+        _xml = _CONFIGURATION_XML_TEMPLATE % ("json_cdr", "json_cdr", _content)
         return _xml
 
     def _sofia_conf_config_sofia(self):
@@ -891,9 +899,7 @@ class FreeSwitchXmlCurl(http.Controller):
         _content = _content.replace("{{agents}}", _agents)
         _content = _content.replace("{{tiers}}", _tiers)
 
-
         _xml = _CONFIGURATION_XML_TEMPLATE % ("callcenter", "callcenter", _content)
-        _logger.info(">>>>>>>>CALLCENTER<<<<<<<<<<< %s" % _xml)
         return _xml
 
     def _acl_conf(self):
@@ -1479,66 +1485,43 @@ class FreeSwitchXmlCurl(http.Controller):
 
     def _verto_conf(self):
         _content = """
-          <settings>
-    <param name="debug" value="0"/>
-    <!-- <param name="kslog" value="true"/> -->
-    <!-- seconds to wait before hanging up a disconnected channel -->
-    <!-- <param name="detach-timeout-sec" value="120"/> -->
-    <!-- enable broadcasting all FreeSWITCH events in Verto -->
-    <!-- <param name="enable-fs-events" value="false"/> -->
-    <!-- enable broadcasting FreeSWITCH presence events in Verto -->
-    <!-- <param name="enable-presence" value="true"/> -->
-  </settings>
+        <settings>
+        <param name="debug" value="0"/>
+        <!-- <param name="kslog" value="true"/> -->
+        <!-- seconds to wait before hanging up a disconnected channel -->
+        <!-- <param name="detach-timeout-sec" value="120"/> -->
+        <!-- enable broadcasting all FreeSWITCH events in Verto -->
+        <!-- <param name="enable-fs-events" value="false"/> -->
+        <!-- enable broadcasting FreeSWITCH presence events in Verto -->
+        <!-- <param name="enable-presence" value="true"/> -->
+        </settings>
 
-  <profiles>
-    <profile name="default-v4">
-      <param name="bind-local" value="$${local_ip_v4}:8081"/>
-      <param name="bind-local" value="$${local_ip_v4}:8082" secure="true"/>
-      <param name="force-register-domain" value="$${domain}"/>
-      <param name="secure-combined" value="$${certs_dir}/wss.pem"/>
-      <param name="secure-chain" value="$${certs_dir}/wss.pem"/>
-      <param name="userauth" value="true"/>
-      <!-- setting this to true will allow anyone to register even with no account so use with care -->
-      <param name="blind-reg" value="false"/>
-      <param name="mcast-ip" value="224.1.1.1"/>
-      <param name="mcast-port" value="1337"/>
-      <param name="rtp-ip" value="$${local_ip_v4}"/>
-      <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
-      <param name="local-network" value="localnet.auto"/>
-      <param name="outbound-codec-string" value="opus,h264,vp8"/>
-      <param name="inbound-codec-string" value="opus,h264,vp8"/>
-
-      <param name="apply-candidate-acl" value="localnet.auto"/>
-      <param name="apply-candidate-acl" value="wan_v4.auto"/>
-      <param name="apply-candidate-acl" value="rfc1918.auto"/>
-      <param name="apply-candidate-acl" value="any_v4.auto"/>
-      <param name="timer-name" value="soft"/>
-      
-    </profile>
-
-    <profile name="default-v6">
-      <param name="bind-local" value="[$${local_ip_v6}]:8081"/>
-      <param name="bind-local" value="[$${local_ip_v6}]:8082" secure="true"/>
-      <param name="force-register-domain" value="$${domain}"/>
-      <param name="secure-combined" value="$${certs_dir}/wss.pem"/>
-      <param name="secure-chain" value="$${certs_dir}/wss.pem"/>
-      <param name="userauth" value="true"/>
-      <!-- setting this to true will allow anyone to register even with no account so use with care -->
-      <param name="blind-reg" value="false"/>
-      <param name="rtp-ip" value="$${local_ip_v6}"/>
-      <!--  <param name="ext-rtp-ip" value=""/> -->
-      <param name="outbound-codec-string" value="opus,h264,vp8"/>
-      <param name="inbound-codec-string" value="opus,h264,vp8"/>
-
-      <param name="apply-candidate-acl" value="wan_v6.auto"/>
-      <param name="apply-candidate-acl" value="rfc1918.auto"/>
-      <param name="apply-candidate-acl" value="any_v6.auto"/>
-      <param name="apply-candidate-acl" value="wan_v4.auto"/>
-      <param name="apply-candidate-acl" value="any_v4.auto"/>
-      <param name="timer-name" value="soft"/>
-      
-    </profile>
-  </profiles>
+        <profiles>
+        <profile name="default-v4">
+        <param name="bind-local" value="$${local_ip_v4}:8081"/>
+        <param name="bind-local" value="$${local_ip_v4}:8082" secure="true"/>
+        <param name="force-register-domain" value="$${domain}"/>
+        <param name="secure-combined" value="$${certs_dir}/wss.pem"/>
+        <param name="secure-chain" value="$${certs_dir}/wss.pem"/>
+        <param name="userauth" value="true"/>
+        <!-- setting this to true will allow anyone to register even with no account so use with care -->
+        <param name="blind-reg" value="false"/>
+        <param name="mcast-ip" value="224.1.1.1"/>
+        <param name="mcast-port" value="1337"/>
+        <param name="rtp-ip" value="$${local_ip_v4}"/>
+        <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
+        <param name="local-network" value="localnet.auto"/>
+        <param name="outbound-codec-string" value="opus,h264,vp8"/>
+        <param name="inbound-codec-string" value="opus,h264,vp8"/>
+        
+        <param name="apply-candidate-acl" value="localnet.auto"/>
+        <param name="apply-candidate-acl" value="wan_v4.auto"/>
+        <param name="apply-candidate-acl" value="rfc1918.auto"/>
+        <param name="apply-candidate-acl" value="any_v4.auto"/>
+        <param name="timer-name" value="soft"/>
+        </profile>
+        
+        </profiles>
 
         """
         return _CONFIGURATION_XML_TEMPLATE % ("verto", "verto", _content)
@@ -1553,8 +1536,8 @@ class FreeSwitchXmlCurl(http.Controller):
         if not self._is_section_name_matched("configuration"):
             return _EMPTY_XML
 
-        if self._is_key_value("xml_cdr.conf"):
-            return self._xml_cdr_conf()
+        if self._is_key_value("json_cdr.conf"):
+            return self._json_cdr_conf()
 
         if self._is_key_value("sofia.conf"):
             return self._sofia_conf()
@@ -1609,9 +1592,6 @@ class FreeSwitchXmlCurl(http.Controller):
 
         if self._is_key_value("db.conf"):
             return self._db_conf()
-
-        # if self._is_key_value("timezones.conf"):
-        #     return self._timezones_conf()
 
         if self._is_key_value("verto.conf"):
             return self._verto_conf()
@@ -2011,7 +1991,3 @@ class FreeSwitchXmlCurl(http.Controller):
         return _EMPTY_XML
 
 
-    @http.route('/freeswitch_xml_cdr', type='http', auth='none', csrf=False)
-    def xml_cdr(self, *args, **kw):
-        _logger.info(http.request.params)
-        return ""

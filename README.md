@@ -7,3 +7,21 @@ Odoo FreeSWITCH CTI connect FreeSWITCH inbound service, so that it can get FreeS
 It run as a standalone process to keep the connection with FreeSWITCH, monitoring FreeSWITCH status changed and push back to Odoo user in realtime.
 
 Odoo user can send CTI command directly to the service and it will execute it via FreeSWITCH inbound interface.
+
+# Highlight Features
+
+## Callcenter Features
+
+  * Call log
+  * Call Recording
+  * Call Queue
+  * Agent Monitoring
+  * Visual Dialplan Configuration
+
+## FreeSwitch Features
+
+   * Event Log
+   * Api Command Sending/Logging
+   * Gateway Configuration
+   * Visual Dialplan Configuration
+
