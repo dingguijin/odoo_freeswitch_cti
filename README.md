@@ -45,5 +45,5 @@ Odoo FreeSWITCH CTI run as a standalone process spawned by Odoo and connect Free
    * Run FreeSWITCH
 
 
-Any question please contact me directly.
-Email: dingguijin#gmail.com
+Any question please drop me an email.
+Email: dingguijin@gmail.com
