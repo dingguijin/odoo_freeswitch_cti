@@ -15,10 +15,14 @@ Odoo user can send CTI command directly to the service and it will execute it vi
   * Call log
   * Call Recording
   * Call Queue
-  * Agent Monitoring
-  * Visual Dialplan Configuration
-  * ASR/TTS Integration
+  * Supervisor/Agent Support
+  * Agent Monitoring/Controlling
+  * Visual Dialplan Configuration/Call Flow Visualization
+  * ASR/TTS Integration (English/Chinese)
   * Voice Service Bot Support
+  * Screen Popup Odoo Contact Form
+  * IP Phone Hardware / Software Support
+  * Phone Standy / Callback Support
 
 ## FreeSwitch Features
 
