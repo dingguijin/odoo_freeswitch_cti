@@ -20,8 +20,9 @@
         'web.assets_qweb': [
         ],
         'web.assets_backend': [
-            'odoo_freeswitch_cti/static/src/js/agent_list.js'
-            'odoo_freeswitch_cti/static/src/js/queue_list.js'
+            'odoo_freeswitch_cti/static/src/js/agent_list.js',
+            'odoo_freeswitch_cti/static/src/js/queue_list.js',
+            'odoo_freeswitch_cti/static/src/js/audio_url.js'
         ],
         'web.assets_frontend': [
         ],

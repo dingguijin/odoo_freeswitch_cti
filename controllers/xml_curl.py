@@ -27,6 +27,8 @@ _CONFIGURATION_XML_TEMPLATE = """
 </document>
 """
 
+from .. import freeswitch_info
+
 _logger = logging.getLogger(__name__)
 
 class FreeSwitchXmlCurl(http.Controller):
@@ -85,19 +87,21 @@ class FreeSwitchXmlCurl(http.Controller):
         return _xml
     
     def _get_freeswitch_ip(self):
-        _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
-        _ss = _model.search_read([("is_active", '=', True)], limit=1)
-        if not _ss:
-            return None
-        return _ss[0].get("freeswitch_ip")
-    
+        # _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
+        # _ss = _model.search_read([("is_active", '=', True)], limit=1)
+        # if not _ss:
+        #     return None
+        # return _ss[0].get("freeswitch_ip")
+        return freeswitch_info._FREESWITCH_INFO.get("freeswitch_ip")
+        
     def _get_freeswitch_password(self):
-        _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
-        _ss = _model.search_read([("is_active", '=', True)], limit=1)
-        if not _ss:
-            return None
-        return _ss[0].get("freeswitch_password")
-
+        # _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
+        # _ss = _model.search_read([("is_active", '=', True)], limit=1)
+        # if not _ss:
+        #     return None
+        # return _ss[0].get("freeswitch_password")
+        return freeswitch_info._FREESWITCH_INFO.get("freeswitch_password")
+    
     def _get_key_value(self):
         if http.request.params.get("key_name") != "name":
             return None
@@ -125,24 +129,25 @@ class FreeSwitchXmlCurl(http.Controller):
         return False
 
     def _is_hostname_matched(self):
-        _freeswitch_hostname = "freeswitch_hostname"
-        _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
-        _ss = _model.search_read([("is_active", '=', True)], limit=1)
-        if not _ss:
-            _logger.error("No freeswitch record")
-            return False
+        # _freeswitch_hostname = "freeswitch_hostname"
+        # _model = http.request.env["freeswitch_cti.freeswitch"].sudo()
+        # _ss = _model.search_read([("is_active", '=', True)], limit=1)
+        # if not _ss:
+        #     _logger.error("No freeswitch record")
+        #     return False
 
-        if  len(_ss) > 1:
-            _logger.error("Too many freeswitchs record")
-            return False
+        # if  len(_ss) > 1:
+        #     _logger.error("Too many freeswitchs record")
+        #     return False
 
-        _hostname = http.request.params.get("hostname")
-        _hostname_config = _ss[0].get("freeswitch_hostname")
-        if _hostname in [_hostname_config, _hostname_config + ".local"]:
-            return True
+        # _hostname = http.request.params.get("hostname")
+        # _hostname_config = _ss[0].get("freeswitch_hostname")
+        # if _hostname in [_hostname_config, _hostname_config + ".local"]:
+        #     return True
         
-        _logger.error("Freeswitch name not matched, expect %s, but %s" % (_ss[0].get("freeswitch_hostname"), http.request.params.get("hostname")))
-        return False
+        # _logger.error("Freeswitch name not matched, expect %s, but %s" % (_ss[0].get("freeswitch_hostname"), http.request.params.get("hostname")))
+        # return False
+        return True
 
     def _json_cdr_conf(self):
         _content = """

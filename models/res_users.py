@@ -94,6 +94,7 @@ class ResUsers(models.Model):
             record.agent_name = "%s@default" % record.sip_number
         return
 
+    @api.depends('groups_id')
     def _compute_is_callcenter_agent(self):
         for record in self:
             if record.sip_number and record.has_group("odoo_freeswitch_cti.group_sip_user"):
@@ -102,6 +103,7 @@ class ResUsers(models.Model):
                 record.is_callcenter_agent = False
         return
 
+    @api.depends('groups_id')
     def _compute_is_callcenter_supervisor(self):
         for record in self:
             if record.sip_number and record.has_group("odoo_freeswitch_cti.group_sip_supervisor"):
@@ -110,15 +112,15 @@ class ResUsers(models.Model):
                 record.is_callcenter_supervisor = False
         return
 
-    def search(self, args, offset=0, limit=None, order=None, count=False):
-        _logger.info("search .... %s", args)
-        self.env.add_to_compute(self._fields["is_callcenter_agent"], super().search([]))
-        self.env.add_to_compute(self._fields["is_callcenter_supervisor"], super().search([]))
-        return super().search(args, offset, limit, order, count)
+    # def search(self, args, offset=0, limit=None, order=None, count=False):
+    #     _logger.info("search .... %s", args)
+    #     self.env.add_to_compute(self._fields["is_callcenter_agent"], super().search([]))
+    #     self.env.add_to_compute(self._fields["is_callcenter_supervisor"], super().search([]))
+    #     return super().search(args, offset, limit, order, count)
 
     def write(self, vals):
-        self._compute_is_callcenter_agent()
+        res = super().write(vals)
         if self.is_callcenter_agent:
-            cti_command.send_cti_command("reload", "mod_callcenter")
-        return
+            self.env["freeswitch_cti.cti_command"].send_cti_command("reload", "mod_callcenter")
+        return res 
     

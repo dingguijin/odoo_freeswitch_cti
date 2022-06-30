@@ -97,6 +97,27 @@
       </field>
     </record>
 
+    <record id="cti_cdr_view_tree" model="ir.ui.view">
+      <field name="name">freeswitch_cti.cti_cdr.view.tree</field>
+      <field name="model">freeswitch_cti.cti_cdr</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name" />
+          <field name="direction" />
+          <field name="channel_uuid" />
+          <field name="call_uuid" />
+          <field name="sip_from_user" />
+          <field name="sip_to_user" />
+          <field name="sip_from_host" />
+          <field name="sip_to_host" />
+          <field name="hangup_cause" />
+          <field name="duration" />
+          <field name="answersec" />
+          <field name="record_url" widget="audio" options={"mime": "audio/wav"}/>
+        </tree>
+      </field>
+    </record>
+
     <!-- Form view -->
     <record id="view_open_view_callcenter_queue_form" model="ir.ui.view"> 
       <field name="name">freeswitch_cti.callcenter_queue.form</field>  
@@ -219,11 +240,11 @@
     <!-- </record> -->
 
     <!-- Actions -->
-    <record id="open_view_freeswitch_list" model="ir.actions.act_window">
-      <field name="name">Freeswitchs</field>
-      <field name="res_model">freeswitch_cti.freeswitch</field>
-      <field name="view_mode">tree,form</field>
-    </record>
+    <!-- <record id="open_view_freeswitch_list" model="ir.actions.act_window"> -->
+    <!--   <field name="name">Freeswitchs</field> -->
+    <!--   <field name="res_model">freeswitch_cti.freeswitch</field> -->
+    <!--   <field name="view_mode">tree,form</field> -->
+    <!-- </record> -->
 
     <record id="open_view_agents_list" model="ir.actions.act_window">
       <field name="name">Agents</field>
@@ -291,7 +312,12 @@
       <field name="view_mode">tree,form</field>
     </record>
 
-    
+    <record id="open_view_cti_cdr_list" model="ir.actions.act_window">
+      <field name="name">CTI Call Log</field>
+      <field name="res_model">freeswitch_cti.cti_cdr</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- Menus -->
     <menuitem
         id="menu_freeswitch_cti_root"
@@ -299,12 +325,12 @@
         web_icon="freeswitch_cti/static/description/icon.png"
         sequence="75"/>
     
-    <menuitem
-        id="menu_all_freeswitchs"
-        name="All Freeswitchs"
-        parent="menu_freeswitch_cti_root"
-        action="open_view_freeswitch_list"
-        sequence="0"/>
+    <!-- <menuitem -->
+    <!--     id="menu_all_freeswitchs" -->
+    <!--     name="All Freeswitchs" -->
+    <!--     parent="menu_freeswitch_cti_root" -->
+    <!--     action="open_view_freeswitch_list" -->
+    <!--     sequence="0"/> -->
 
     <menuitem
         id="menu_all_agents"
@@ -339,6 +365,13 @@
         name="Callcenter Queues"
         parent="menu_freeswitch_cti_root"
         action="open_view_callcenter_queue_list"
+        sequence="0"/>
+
+    <menuitem
+        id="menu_all_cdr"
+        name="Callcenter Call Log"
+        parent="menu_freeswitch_cti_root"
+        action="open_view_cti_cdr_list"
         sequence="0"/>
 
   </data>

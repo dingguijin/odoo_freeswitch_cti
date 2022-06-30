@@ -16,6 +16,8 @@ import urllib
 
 import odoo
 
+from . import freeswitch_info
+
 _logger = logging.getLogger(__name__)
 
 class FreeSwitchClient():
@@ -128,12 +130,12 @@ class FreeSwitchClient():
     
     async def run_loop(self):
         self.db_connection = odoo.sql_db.db_connect(self.dbname)
-        _freeswitch = self._get_freeswitch_info(self.db_connection)
-        if not _freeswitch:
-            _logger.error("No freeswitch, exit CTI.")
-            return
+        # _freeswitch = self._get_freeswitch_info(self.db_connection)
+        # if not _freeswitch:
+        #     _logger.error("No freeswitch, exit CTI.")
+        #     return
         
-        self.freeswitch_info = _freeswitch
+        self.freeswitch_info = freeswitch_info._FREESWITCH_INFO
         
         await asyncio.gather(self._run_command_loop(),
                              self._run_cti_loop())
@@ -470,6 +472,9 @@ class FreeSwitchClient():
         return _freeswitch
 
     def _update_freeswitch_info_last_seen(self):
+        if not self.freeswitch_info.get("id"):
+            return
+        
         with self.db_connection.cursor() as cr:
             cr.execute("""
             UPDATE freeswitch_cti_freeswitch
@@ -492,10 +497,10 @@ class FreeSwitchClient():
         with self.db_connection.cursor() as cr:
             _r = cr.execute("""
             INSERT into freeswitch_cti_cti_event
-            (name, freeswitch, content_type, content_length, content_content, event_content, subclass, command_name, create_date) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, now()) RETURNING id;
+            (name, content_type, content_length, content_content, event_content, subclass, command_name, create_date) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, now()) RETURNING id;
             """, (headers.get("Event-Name") or "",
-                  self.freeswitch_info["id"],
+#                  self.freeswitch_info["id"],
                   headers.get("Content-Type") or "",
                   headers.get("Content-Length") or 0,
                   headers.get("Content-Content") or "",

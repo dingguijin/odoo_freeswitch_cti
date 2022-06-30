@@ -40,4 +40,12 @@ class CtiCdr(models.Model):
     waitsec = fields.Integer("Wait Seconds")
 
     record_file = fields.Char("Record File")
+    record_url = fields.Char("Record Url", compute='_compute_record_url')
+
+    @api.depends("record_file")
+    def _compute_record_url(self):
+        for _record in self:
+            if _record.record_file:
+                _record.record_url = "/freeswitch_recording/" + _record.record_file
+        return
 
