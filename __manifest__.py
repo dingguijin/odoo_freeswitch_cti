@@ -14,12 +14,28 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/views.xml',
+        'data/dialplan.xml',
         'data/freeswitch.xml'
     ],
     'assets': {
         'web.assets_qweb': [
+            'odoo_freeswitch_cti/static/src/xml/*.xml'
         ],
         'web.assets_backend': [
+            'odoo_freeswitch_cti/static/scss/*.scss',
+            
+            'odoo_freeswitch_cti/static/lib/js/jquery.panzoom/jquery.panzoom.js',
+            'odoo_freeswitch_cti/static/lib/js/jquery.flowchart/jquery.flowchart.js',
+            'odoo_freeswitch_cti/static/lib/js/html2canvas/html2canvas.js'
+
+            'odoo_freeswitch_cti/static/src/js/node/*.js',
+            'odoo_freeswitch_cti/static/src/js/widget/*.js',
+            
+            'odoo_freeswitch_cti/static/src/js/dialplan_model.js',
+            'odoo_freeswitch_cti/static/src/js/dialplan_renderer.js',
+            'odoo_freeswitch_cti/static/src/js/dialplan_controller.js',
+            'odoo_freeswitch_cti/static/src/js/dialplan_view.js',
+
             'odoo_freeswitch_cti/static/src/js/agent_list.js',
             'odoo_freeswitch_cti/static/src/js/queue_list.js',
             'odoo_freeswitch_cti/static/src/js/audio_url.js'
@@ -35,4 +51,5 @@
     'application': True,
     'license': 'LGPL-3',
     'post_load': 'post_load',
+    'post_init_hook': 'post_init_hook'
 }

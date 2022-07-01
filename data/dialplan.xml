@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+  <record id="freeswitch_cti_extension_1" model="freeswitch_cti.dialplan_extension">
+    <field name="type">telephone</field>
+    <field name="name">Test Dialplab Flow 1</field>
+    <field name="profile">internal</field>
+    <field name="context">default</field>
+    <field name="condition"></field>
+    <field name="is_active" eval="True"></field>
+  </record>
+    
+  <record id="freeswitch_cti_node_1" model="freeswitch_cti.dialplan_node">
+    <field name="type">start</field>
+    <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
+    <field name="name">Node Start 1</field>
+    <field name="display_left">100</field>
+    <field name="display_top">100</field>
+  </record>
+  
+  <record id="freeswitch_cti_node_2" model="freeswitch_cti.dialplan_node">
+    <field name="type">playback</field>
+    <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
+    <field name="name">Node Playback 2</field>
+    <field name="display_left">380</field>
+    <field name="display_top">300</field>
+  </record>
+
+  <record id="freeswitch_cti_node_3" model="freeswitch_cti.dialplan_node">
+    <field name="type">exit</field>
+    <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
+    <field name="name">Node Exit 3</field>
+    <field name="display_left">680</field>
+    <field name="display_top">100</field>
+  </record>
+
+    <record id="freeswitch_cti_event_1" model="freeswitch_cti.dialplan_node_event">
+    <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
+    <field name="name">SUCCESS</field>
+    <field name="node_id" ref="freeswitch_cti_node_1"></field>
+    <field name="next_node" ref="freeswitch_cti_node_2"></field>
+  </record>
+
+  <record id="freeswitch_cti_event_2" model="freeswitch_cti.dialplan_node_event">
+    <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
+    <field name="name">PLAYBACK_END</field>
+    <field name="node_id" ref="freeswitch_cti_node_2"></field>
+    <field name="next_node" ref="freeswitch_cti_node_3"></field>
+  </record>
+
+</odoo>

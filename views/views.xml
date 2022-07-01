@@ -41,7 +41,85 @@
       </field>
     </record>
 
+    <!-- Server Actions -->
+    <record id="ir_actions_server_dialplan_extension" model="ir.actions.server">
+      <field name="name">Dialplan Graph</field>
+      <field name="model_id" ref="model_freeswitch_cti_dialplan_extension"/>
+      <field name="binding_model_id" ref="model_freeswitch_cti_dialplan_extension"/>
+      <field name="binding_type">action</field>
+      <field name="binding_view_types">form</field>
+      <field name="state">code</field>
+      <field name="code">
+if records:  
+ action = {
+   "type": "ir.actions.act_window",
+   "name": "Dialplan Graph",
+   "view_mode": "dialplan",
+   "res_model": "freeswitch_cti.dialplan_extension",
+   "res_id": records[0].id,
+ }        
+      </field>
+    </record>
+
     <!-- Views -->
+    <record id="diaplan_extension_view_dialplan" model="ir.ui.view">
+      <field name="name">dialplan.extension.view.dialplan</field>
+      <field name="model">freeswitch_cti.dialplan_extension</field>
+      <field name="arch" type="xml">
+        <dialplan string="Dialplan Extension Flow Graph">
+        </dialplan>
+      </field>
+    </record>
+
+    <record id="diaplan_extension_view_tree" model="ir.ui.view">
+      <field name="name">dialplan.extension.view.tree</field>
+      <field name="model">freeswitch_cti.dialplan_extension</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="id"/>
+          <field name="name"/>
+          <field name="type"/>
+          <field name="profile"/>
+          <field name="is_continue"/>
+          <field name="condition"/>
+          <field name="priority"/>
+          <field name="is_active"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="diaplan_extension_view_form" model="ir.ui.view">
+      <field name="name">dialplan.extension.view.form</field>
+      <field name="model">freeswitch_cti.dialplan_extension</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="profile"/>
+              </group>
+              <group>
+                <field name="is_continue"/>
+                <field name="condition"/>
+                <field name="priority"/>
+                <field name="is_active"/>
+              </group>              
+            </group>
+            <notebook>
+              <page string="Nodes">
+                <tree>
+                  <field name="node_ids"/>
+                </tree>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record id="freeswitch_view_tree" model="ir.ui.view">
       <field name="name">freeswitch_cti.freeswitch.view.tree</field>
       <field name="model">freeswitch_cti.freeswitch</field>
@@ -113,7 +191,7 @@
           <field name="hangup_cause" />
           <field name="duration" />
           <field name="answersec" />
-          <field name="record_url" widget="audio" options={"mime": "audio/wav"}/>
+          <field name="record_url" widget="audio" options="{'mime': 'audio/wav'}"/>
         </tree>
       </field>
     </record>
@@ -231,38 +309,10 @@
       </field>
     </record>
 
-    <!-- Action view -->
-    <!-- <record id="action_open_view_callcenter_queue_form" model="ir.actions.act_window.view"> -->
-    <!--   <field eval="10" name="sequence"/> -->
-    <!--   <field name="view_mode">form</field> -->
-    <!--   <field name="view_id" ref="view_open_view_callcenter_queue_form"/> -->
-    <!--   <field name="act_window_id" ref="open_view_callcenter_queue_list"/> -->
-    <!-- </record> -->
-
-    <!-- Actions -->
-    <!-- <record id="open_view_freeswitch_list" model="ir.actions.act_window"> -->
-    <!--   <field name="name">Freeswitchs</field> -->
-    <!--   <field name="res_model">freeswitch_cti.freeswitch</field> -->
-    <!--   <field name="view_mode">tree,form</field> -->
-    <!-- </record> -->
-
     <record id="open_view_agents_list" model="ir.actions.act_window">
       <field name="name">Agents</field>
       <field name="res_model">res.users</field>
       <field name="domain">[["is_callcenter_agent", "=", True]]</field>
-      <field name="view_mode">tree,form</field>
-    </record>
-
-    <record id="open_view_supervisors_list" model="ir.actions.act_window">
-      <field name="name">Supervisors</field>
-      <field name="res_model">res.users</field>
-      <field name="domain">[["is_callcenter_supervisor", "=", True]]</field>
-      <field name="view_mode">tree,form</field>
-    </record>
-
-    <record id="open_view_callcenter_queue_list" model="ir.actions.act_window">
-      <field name="name">Queues</field>
-      <field name="res_model">freeswitch_cti.callcenter_queue</field>
       <field name="view_mode">tree,form</field>
     </record>
 
@@ -300,6 +350,13 @@
       </field>
     </record>
 
+    
+    <record id="open_view_callcenter_queue_list" model="ir.actions.act_window">
+      <field name="name">Queues</field>
+      <field name="res_model">freeswitch_cti.callcenter_queue</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
     <record id="open_view_cti_command_list" model="ir.actions.act_window">
       <field name="name">CTI Commands</field>
       <field name="res_model">freeswitch_cti.cti_command</field>
@@ -318,6 +375,12 @@
       <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="open_view_dialplan_extension_list" model="ir.actions.act_window">
+      <field name="name">Dialplan Extension</field>
+      <field name="res_model">freeswitch_cti.dialplan_extension</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- Menus -->
     <menuitem
         id="menu_freeswitch_cti_root"
@@ -325,26 +388,12 @@
         web_icon="freeswitch_cti/static/description/icon.png"
         sequence="75"/>
     
-    <!-- <menuitem -->
-    <!--     id="menu_all_freeswitchs" -->
-    <!--     name="All Freeswitchs" -->
-    <!--     parent="menu_freeswitch_cti_root" -->
-    <!--     action="open_view_freeswitch_list" -->
-    <!--     sequence="0"/> -->
-
     <menuitem
         id="menu_all_agents"
         name="All Agents"
         parent="menu_freeswitch_cti_root"
         action="open_view_agents_list"
         sequence="1"/>
-
-    <menuitem
-        id="menu_all_supervisors"
-        name="All SuperVisors"
-        parent="menu_freeswitch_cti_root"
-        action="open_view_supervisors_list"
-        sequence="2"/>
 
     <menuitem
         id="menu_all_cti_commands"
@@ -372,6 +421,13 @@
         name="Callcenter Call Log"
         parent="menu_freeswitch_cti_root"
         action="open_view_cti_cdr_list"
+        sequence="0"/>
+
+    <menuitem
+        id="menu_all_dialplan"
+        name="Callcenter Dialplan"
+        parent="menu_freeswitch_cti_root"
+        action="open_view_dialplan_extension_list"
         sequence="0"/>
 
   </data>

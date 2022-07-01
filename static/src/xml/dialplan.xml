@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+  <t t-name="node_static_template">
+    <div class="o_flow_panel_card">
+      <div class="o_flow_panel_card_title">
+        Node Type
+      </div>
+      <div class="o_flow_panel_card_body">
+        <t t-esc="widget.node.node_type"/>
+      </div>
+    </div>
+    <div class="o_flow_panel_card">
+      <div class="o_flow_panel_card_title">
+        Node ID
+      </div>
+      <div class="o_flow_panel_card_body">
+        <t t-esc="widget.node.node_id"/>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="DialplanView.buttons">
+    <div class="o_flow_buttons_edit" role="toolbar" aria-label="Main actions">
+      <button type="button"
+              class="btn btn-primary o_flow_button_save" accesskey="s">
+        Save
+      </button>
+      <button type="button"
+              class="btn btn-secondary o_flow_button_cancel" accesskey="j">
+        Discard
+      </button>
+    </div>
+  </t>
+
+</templates>

@@ -8,7 +8,7 @@ class FreeSwitch(models.Model):
     _name = "freeswitch_cti.gateway"
     _description = "FreeSwitch Gateway"
 
-    name = fields.Char('FreeSwitch Gateway for outbound call', required=True)
+    name = fields.Char('FreeSwitch Gateway', required=True)
     
     gateway_ip = fields.Char('gateway ip', required=True)
     gateway_account = fields.Char('Gateway account', translate=True, required=True)
@@ -18,3 +18,5 @@ class FreeSwitch(models.Model):
     is_online = fields.Boolean("Is online", required=False)
     uptime = fields.Integer("Uptime", required=False)
     last_seen = fields.Datetime("Last seen", required=False)
+
+    register_direction = fields.Selection([("freeswitch", "Register To FreeSWITCH"), ("ims", "Register To ISP")], "Register Direciton")

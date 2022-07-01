@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+  <t t-name="panel_link_template">
+    <div class="o_flow_panel_card">
+      <div class="o_flow_panel_card_title">
+        Link
+      </div>
+      <div class="o_flow_panel_card_body">
+        <table class="o_flow_panel_link_table">
+          <thead>
+            <tr>
+              <th>事件</th>
+              <th>节点</th>
+            </tr>
+          </thead>
+          <tbody>
+            <t t-foreach="widget.node.node_path" t-as="path">
+              <tr>
+                <td><strong><t t-esc="path"/></strong></td>
+                <td class="o_flow_panel_node_td">
+                  <div>
+                    <input class="o_flow_panel_node_select form-control" t-attf-id="{{'o_flow_panel_node_select_'+path}}" type="select"/>
+                  </div>
+                </td>
+              </tr>
+            </t>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="panel_input_template">
+    <div class="o_flow_panel_card">
+      <div class="o_flow_panel_card_title">
+        <t t-esc="widget.input.label"/>
+      </div>
+      <div class="o_flow_panel_card_body">
+        <div class="o_flow_panel_card_input_container">
+          <div class="o_flow_panel_card_input">
+            <input t-att-name="widget.input.name" t-att-value="widget.input.value"/>
+          </div>
+          <div class="o_flow_panel_card_input_button">
+            <span class="o_flow_panel_card_input_button_ok fa fa-check"></span>
+            <span class="o_flow_panel_card_input_button_cancel fa fa-close"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="panel_widget_template">
+    <div class="o_flow_panel_widget">
+    </div>
+  </t>
+
+</templates>
