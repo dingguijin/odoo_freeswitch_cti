@@ -1,15 +1,15 @@
-odoo.define('web.node_start', function (require) {
+odoo.define('freeswitch_cti.node_start', function (require) {
     "use strict";
 
-    var NodeAbstract = require('web.node_abstract');
-    var NodeRegistry = require('web.node_registry');
+    var NodeAbstract = require('freeswitch_cti.node_abstract');
+    var NodeRegistry = require('freeswitch_cti.node_registry');
 
     var NodeStart = NodeAbstract.extend({
         node_path: function() {
             return ["SUCCESS"];
         },        
         node_type: function() {
-            return "node_start";
+            return "start";
         },
         node_name: function() {
             return "Start Dialplan";
@@ -19,7 +19,7 @@ odoo.define('web.node_start', function (require) {
         }
     });
 
-    NodeRegistry.add("node_start", new NodeStart());
+    NodeRegistry.add("start", new NodeStart());
     
     return NodeStart;
 });

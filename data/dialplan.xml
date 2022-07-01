@@ -11,7 +11,7 @@
   </record>
     
   <record id="freeswitch_cti_node_1" model="freeswitch_cti.dialplan_node">
-    <field name="type">start</field>
+    <field name="node_type">start</field>
     <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
     <field name="name">Node Start 1</field>
     <field name="display_left">100</field>
@@ -19,7 +19,7 @@
   </record>
   
   <record id="freeswitch_cti_node_2" model="freeswitch_cti.dialplan_node">
-    <field name="type">playback</field>
+    <field name="node_type">playback</field>
     <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
     <field name="name">Node Playback 2</field>
     <field name="display_left">380</field>
@@ -27,7 +27,7 @@
   </record>
 
   <record id="freeswitch_cti_node_3" model="freeswitch_cti.dialplan_node">
-    <field name="type">exit</field>
+    <field name="node_type">exit</field>
     <field name="extension_id" ref="freeswitch_cti_extension_1"></field>
     <field name="name">Node Exit 3</field>
     <field name="display_left">680</field>

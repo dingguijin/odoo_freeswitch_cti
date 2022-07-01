@@ -1,8 +1,8 @@
-odoo.define('web.node_assignment', function (require) {
+odoo.define('freeswitch_cti.node_assignment', function (require) {
     "use strict";
 
-    var NodeAbstract = require('web.node_abstract');
-    var NodeRegistry = require('web.node_registry');
+    var NodeAbstract = require('freeswitch_cti.node_abstract');
+    var NodeRegistry = require('freeswitch_cti.node_registry');
 
     var NodeAssignment = NodeAbstract.extend({
         node_path: function() {
@@ -10,7 +10,7 @@ odoo.define('web.node_assignment', function (require) {
         },
         
         node_type: function() {
-            return "node_assignment";
+            return "assignment";
         },
         node_name: function() {
             return "Assign Agent";
@@ -25,7 +25,7 @@ odoo.define('web.node_assignment', function (require) {
         }
     });
 
-    NodeRegistry.add("node_assignment", new NodeAssignment());
+    NodeRegistry.add("assignment", new NodeAssignment());
     
     return NodeAssignment;
 });

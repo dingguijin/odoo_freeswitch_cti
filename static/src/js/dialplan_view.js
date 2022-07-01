@@ -1,21 +1,18 @@
 odoo.define('freeswitch_cti.DialplanView', function (require) {
     "use strict";
 
-    var BasicView = require('web.BasicView');
-    var AbstractView = require('web.AbstractView');
-    var core = require('web.core');
     var Model = require('freeswitch_cti.DialplanModel');
     var Renderer = require('freeswitch_cti.DialplanRenderer');
     var Controller = require('freeswitch_cti.DialplanController');
 
-    var view_registry = require('web.view_registry');
-    var _lt = core._lt;
+    var AbstractView = require('web.AbstractView');
+    var viewRegistry = require('web.view_registry');
 
     /**
      * Dialplan View
      */
     var DialplanView = AbstractView.extend({
-        display_name: _lt('Dialplan'),
+        display_name: 'Dialplan',
         icon: 'fa-code-fork',
         multi_record: false,
         withSearchBar: false,
@@ -40,7 +37,7 @@ odoo.define('freeswitch_cti.DialplanView', function (require) {
 
     });
 
-    view_registry.add('dialplan', DialplanView);
+    viewRegistry.add('dialplan', DialplanView);
     return DialplanView;
 
 });

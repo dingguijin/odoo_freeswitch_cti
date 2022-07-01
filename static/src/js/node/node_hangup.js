@@ -1,8 +1,8 @@
-odoo.define('web.node_hangup', function (require) {
+odoo.define('freeswitch_cti.node_hangup', function (require) {
     "use strict";
 
-    var NodeAbstract = require('web.node_abstract');
-    var NodeRegistry = require('web.node_registry');
+    var NodeAbstract = require('freeswitch_cti.node_abstract');
+    var NodeRegistry = require('freeswitch_cti.node_registry');
 
     var NodeHangup = NodeAbstract.extend({
         node_path: function() {
@@ -10,7 +10,7 @@ odoo.define('web.node_hangup', function (require) {
         },
         
         node_type: function() {
-            return "node_hangup";
+            return "hangup";
         },
         node_name: function() {
             return "Hangup Telephone";
@@ -25,7 +25,7 @@ odoo.define('web.node_hangup', function (require) {
         }
     });
 
-    NodeRegistry.add("node_hangup", new NodeHangup());
+    NodeRegistry.add("hangup", new NodeHangup());
     
     return NodeHangup;
 });

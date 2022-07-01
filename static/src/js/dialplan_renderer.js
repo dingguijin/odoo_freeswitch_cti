@@ -2,7 +2,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
     "use strict";
 
     var AbstractRenderer = require('web.AbstractRenderer');
-    var NodeRegistry = require('web.node_registry');
+    var NodeRegistry = require('freeswitch_cti.node_registry');
     var PanelWidget = require("freeswitch_cti.panel_widget");
 
     /**
@@ -418,8 +418,8 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
             var zoomPos = { x: containerLeft, y: containerTop };
 
             var ctx = canvas.getContext("2d");
-            ctx.strokeStyle = "#767676"; //设置线条的样式颜色
-            ctx.lineWidth = 15; //设置描边的线宽
+            ctx.strokeStyle = "#767676";
+            ctx.lineWidth = 15;
             ctx.strokeRect(zoomPos.x, zoomPos.y, viewPointSize.x, viewPointSize.y);
         },
 

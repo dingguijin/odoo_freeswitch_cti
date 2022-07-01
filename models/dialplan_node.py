@@ -15,7 +15,7 @@ class DialplanNode(models.Model):
     name = fields.Char('Name', required=True)
     extension_id = fields.Many2one('freeswitch_cti.dialplan_extension', string='Dialplan Extension', ondelete='cascade')
     
-    type = fields.Selection(_node_types, 'Type')
+    node_type = fields.Selection(_node_types, 'Type')
     
     node_param = fields.Char("Node Parameter")
     node_timeout = fields.Integer("Node Timeout")

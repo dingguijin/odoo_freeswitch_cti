@@ -1,8 +1,8 @@
-odoo.define('web.node_playback', function (require) {
+odoo.define('freeswitch_cti.node_playback', function (require) {
     "use strict";
 
-    var NodeAbstract = require('web.node_abstract');
-    var NodeRegistry = require('web.node_registry');
+    var NodeAbstract = require('freeswitch_cti.node_abstract');
+    var NodeRegistry = require('freeswitch_cti.node_registry');
 
     var NodePlayback = NodeAbstract.extend({
         node_path: function() {
@@ -32,7 +32,7 @@ odoo.define('web.node_playback', function (require) {
         },
 
         node_type: function() {
-            return "node_playback";
+            return "playback";
         },
 
         node_name: function() {
@@ -48,7 +48,7 @@ odoo.define('web.node_playback', function (require) {
         }
     });
 
-    NodeRegistry.add("node_playback", new NodePlayback());
+    NodeRegistry.add("playback", new NodePlayback());
     
     return NodePlayback;
 });

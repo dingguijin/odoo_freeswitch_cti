@@ -3,7 +3,8 @@ odoo.define('freeswitch_cti.panel_widget', function (require) {
 
     var core = require('web.core');
     var Widget = require('web.Widget');
-    var NodeRegistry = require("web.node_registry");
+    
+    var NodeRegistry = require("freeswitch_cti.node_registry");
 
     var QWeb = core.qweb;
 

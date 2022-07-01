@@ -1,4 +1,4 @@
-odoo.define('web.node_abstract', function (require) {
+odoo.define('freeswitch_cti.node_abstract', function (require) {
     "use strict";
 
     var Class = require("web.Class");

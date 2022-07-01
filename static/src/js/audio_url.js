@@ -6,7 +6,7 @@ import fieldRegistry from 'web.field_registry';
 import basicFields from 'web.basic_fields';
 
 var AudioUrlWidget = basicFields.InputField.extend({
-    description: _lt("Audio URL"),
+    description: "Audio URL",
     className: 'o_audio_field_url',
     events: _.extend({}, basicFields.InputField.prototype.events, {
         'click': '_onClick',

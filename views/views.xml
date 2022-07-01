@@ -62,8 +62,8 @@ if records:
     </record>
 
     <!-- Views -->
-    <record id="diaplan_extension_view_dialplan" model="ir.ui.view">
-      <field name="name">dialplan.extension.view.dialplan</field>
+    <record id="diaplan_extension_view_dialplan_graph" model="ir.ui.view">
+      <field name="name">dialplan_extension.view.dialplan.graph</field>
       <field name="model">freeswitch_cti.dialplan_extension</field>
       <field name="arch" type="xml">
         <dialplan string="Dialplan Extension Flow Graph">
@@ -378,7 +378,7 @@ if records:
     <record id="open_view_dialplan_extension_list" model="ir.actions.act_window">
       <field name="name">Dialplan Extension</field>
       <field name="res_model">freeswitch_cti.dialplan_extension</field>
-      <field name="view_mode">tree,form</field>
+      <field name="view_mode">tree,form,dialplan</field>
     </record>
 
     <!-- Menus -->

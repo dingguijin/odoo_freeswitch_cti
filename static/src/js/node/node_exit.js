@@ -1,12 +1,12 @@
-odoo.define('web.node_exit', function (require) {
+odoo.define('freeswitch_cti.node_exit', function (require) {
     "use strict";
 
-    var NodeAbstract = require('web.node_abstract');
-    var NodeRegistry = require('web.node_registry');
+    var NodeAbstract = require('freeswitch_cti.node_abstract');
+    var NodeRegistry = require('freeswitch_cti.node_registry');
 
     var NodeExit = NodeAbstract.extend({
         node_type: function() {
-            return "node_exit";
+            return "exit";
         },
         node_name: function() {
             return "Exit Flow";
@@ -16,7 +16,7 @@ odoo.define('web.node_exit', function (require) {
         },
     });
 
-    NodeRegistry.add("node_exit", new NodeExit());
+    NodeRegistry.add("exit", new NodeExit());
     
     return NodeExit;
 });
