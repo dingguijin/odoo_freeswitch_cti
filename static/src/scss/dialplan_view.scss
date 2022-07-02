@@ -179,8 +179,15 @@
                     height: 40px;
                     display: flex;
                     align-items: center;
+                    background: #CCCCCC;
                 }
 
+                &.selected {
+                    .flowchart-operator-title {
+                        background: #F0F0F0;
+                    }
+                }
+                
                 .o_flow_operator_overlay {
                     position: absolute;
                     right: 0px;
@@ -255,6 +262,19 @@
                     content: "\f2bd";
                 }
             }
+
+            .o_operator_icon_exchange {
+                .flowchart-operator-body:before {
+                    content: "\f0ec";
+                }
+            }
+
+            .o_operator_icon_phone {
+                .flowchart-operator-body:before {
+                    content: "\f095";
+                }
+            }
+
         }
     }
 }
