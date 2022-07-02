@@ -24,7 +24,7 @@ odoo.define('freeswitch_cti.panel_link', function (require) {
         start: function () {
             var nodes = [];
             _.each(this.node.operators, function (operator, operatorId) {
-                if (operator.type == "node_start") {
+                if (operator.type == "start") {
                     return;
                 }
                 nodes.push({

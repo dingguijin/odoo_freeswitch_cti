@@ -1,242 +1,242 @@
 .o_flow_view {
-  height: 100%;
-  width: 100%;
-  min-height: 768px;
-
-  display: flex;
-  flex-direction: row;
-
-  .o_flow_right {
-      
-    width: 360px;
     height: 100%;
+    width: 100%;
+    min-height: 768px;
+
     display: flex;
-    flex-direction: column;
-    box-sizing: content-box;
-    border-left: solid;
+    flex-direction: row;
 
-    .o_flow_panel_container {
-      width: 100%;
-      overflow: auto;
-      flex: 1;
-      border-bottom: solid;
-
-      .o_flow_panel {
-        width: 100%;
+    .o_flow_right {
+        
+        width: 360px;
+        height: 100%;
         display: flex;
         flex-direction: column;
+        box-sizing: content-box;
+        border-left: solid;
 
-        .o_flow_panel_card {
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          margin: 8px;
-          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2),
-            0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
-          .o_flow_panel_card_title {
-            padding: 24px 16px 16px;
-            display: flex;
-            flex: 1 1 auto;
-            flex-direction: row;
-          }
-          .o_flow_panel_card_body {
-            display: block;
-            padding: 16px;
-            padding-bottom: 32px;
+        .o_flow_panel_container {
+            width: 100%;
+            overflow: auto;
+            flex: 1;
+            border-bottom: solid;
 
-            table {
-              width: 100%;
-              .o_flow_panel_node_td {
-                width: 160px;
-                .o_flow_panel_node_select {
-                  width: 100%;
-                  input {
-                    width: 100%;
-                  }
-                }
-              }
-            }
-
-            .o_flow_panel_card_input_container {
-              display: flex;
-              flex-direction: row;
-
-              .o_flow_panel_card_input {
-                flex: 1;
-                input {
-                  width: 100%;
-                }
-              }
-
-              .o_flow_panel_card_input_button {
-                font-size: 20px;
+            .o_flow_panel {
+                width: 100%;
                 display: flex;
-                flex-direction: row;
-                .o_flow_panel_card_input_button_ok {
-                  cursor: pointer;
-                  padding-left: 5px;
-                  padding-right: 5px;
+                flex-direction: column;
+
+                .o_flow_panel_card {
+                    box-sizing: border-box;
+                    display: flex;
+                    flex-direction: column;
+                    margin: 8px;
+                    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2),
+                                0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
+                    .o_flow_panel_card_title {
+                        padding: 24px 16px 16px;
+                        display: flex;
+                        flex: 1 1 auto;
+                        flex-direction: row;
+                    }
+                    .o_flow_panel_card_body {
+                        display: block;
+                        padding: 16px;
+                        padding-bottom: 32px;
+
+                        table {
+                            width: 100%;
+                            .o_flow_panel_node_td {
+                                width: 160px;
+                                .o_flow_panel_node_select {
+                                    width: 100%;
+                                    input {
+                                        width: 100%;
+                                    }
+                                }
+                            }
+                        }
+
+                        .o_flow_panel_card_input_container {
+                            display: flex;
+                            flex-direction: row;
+
+                            .o_flow_panel_card_input {
+                                flex: 1;
+                                input {
+                                    width: 100%;
+                                }
+                            }
+
+                            .o_flow_panel_card_input_button {
+                                font-size: 20px;
+                                display: flex;
+                                flex-direction: row;
+                                .o_flow_panel_card_input_button_ok {
+                                    cursor: pointer;
+                                    padding-left: 5px;
+                                    padding-right: 5px;
+                                }
+                                .o_flow_panel_card_input_button_cancel {
+                                    cursor: pointer;
+                                    padding-right: 5px;
+                                }
+                            }
+                        }
+                    }
+                    .o_flow_panel_card_title + .o_flow_panel_card_body {
+                        padding-top: 0;
+                    }
                 }
-                .o_flow_panel_card_input_button_cancel {
-                  cursor: pointer;
-                  padding-right: 5px;
-                }
-              }
             }
-          }
-          .o_flow_panel_card_title + .o_flow_panel_card_body {
-            padding-top: 0;
-          }
         }
-      }
+
+        .o_flow_zoom_container {
+            overflow: hidden;
+            
+            height: 360px;
+            width: 100%;
+            position: relative;
+
+            .o_flow_view_point_mask {
+                position: absolute;
+                background-color: darkseagreen;
+                opacity: 0.5;    
+            }
+
+            .o_flow_zoom {
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                
+                
+                img {
+                    width: 100%;
+                }
+
+                canvas {
+                    width: 100%;
+                    height: 100%;
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
+        }
     }
 
-    .o_flow_zoom_container {
-      overflow: hidden;
-      
-      height: 360px;
-      width: 100%;
-      position: relative;
-
-      .o_flow_view_point_mask {
-          position: absolute;
-          background-color: darkseagreen;
-          opacity: 0.5;    
-      }
-
-      .o_flow_zoom {
-        height: 100%;
-        width: 100%;
-        overflow: hidden;
-      
-        
-        img {
-          width: 100%;
-        }
-
-        canvas {
+    .o_flow_toolbar_container {
+        .o_flow_toolbar {
+            display: flex;
+            flex-direction: column;
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
+            overflow-y: auto;
+            border-right: solid;
+
+            .o_flow_toolbar_item {
+                width: 180px;
+                height: 80px;
+                min-height: 80px;
+                max-height: 80px;
+                padding: 10px;
+                display: flex;
+                flex-direction: row;
+
+                align-items: center;
+                cursor: pointer;
+
+                &:hover {
+                    background-color: lightgray;
+                }
+
+                span {
+                    font-size: 40px;
+                    display: inline-flex !important;
+                }
+
+                p {
+                    margin:0px;
+                    padding-left: 10px;
+                }
+            }
         }
-      }
     }
-  }
 
-  .o_flow_toolbar_container {
-    .o_flow_toolbar {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
-      border-right: solid;
+    .o_flow_container {
+        flex: 1;
+        height: 100%;
+        overflow: hidden;
 
-      .o_flow_toolbar_item {
-        width: 180px;
-        height: 80px;
-        min-height: 80px;
-        max-height: 80px;
-        padding: 10px;
-        display: flex;
-        flex-direction: row;
+        .o_flow_chart {
+            width: 3600px;
+            height: 3600px;
+            background-color: darkgray;
 
-        align-items: center;
-        cursor: pointer;
+            .o_operator_icon {
+                width: 220px;
+            }
 
-        &:hover {
-          background-color: lightgray;
+            .flowchart-operator-body {
+                text-align: center;
+                &:before {
+                    display: inline-block;
+                    font: normal normal normal 14px/1 FontAwesome;
+                    font-size: 43px;
+                    text-rendering: auto;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                }
+            }
+
+            .o_operator_icon_music {
+                .flowchart-operator-body:before {
+                    content: "\f001";
+                }
+            }
+
+            .o_operator_icon_circle-o {
+                .flowchart-operator-body:before {
+                    content: "\f10c";
+                }
+            }
+
+            .o_operator_icon_stop-circle-o {
+                .flowchart-operator-body:before {
+                    content: "\f28e";
+                }
+            }
+
+            .o_operator_icon_play-circle-o {
+                .flowchart-operator-body:before {
+                    content: "\f01d";
+                }
+            }
+
+            .o_operator_icon_tty {
+                .flowchart-operator-body:before {
+                    content: "\f1e4";
+                }
+            }
+
+            .o_operator_icon_user-circle {
+                .flowchart-operator-body:before {
+                    content: "\f2bd";
+                }
+            }
+
+            .o_flow_operator_overlay {
+                position: absolute;
+                top: 2px;
+                right: 0px;
+
+                .o_flow_operator_overlay_button {
+                    cursor: pointer;
+                    width: 22px;
+                    .fa {
+                        font-size: 20px;
+                    }
+                }
+            }
         }
-
-        span {
-          font-size: 40px;
-          display: inline-flex !important;
-        }
-
-        p {
-            margin:0px;
-            padding-left: 10px;
-        }
-      }
     }
-  }
-
-  .o_flow_container {
-    flex: 1;
-    height: 100%;
-    overflow: hidden;
-
-    .o_flow_chart {
-      width: 3600px;
-      height: 3600px;
-      background-color: darkgray;
-
-      .o_operator_icon {
-        width: 220px;
-      }
-
-      .flowchart-operator-body {
-        text-align: center;
-        &:before {
-          display: inline-block;
-          font: normal normal normal 14px/1 FontAwesome;
-          font-size: 43px;
-          text-rendering: auto;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-      }
-
-      .o_operator_icon_music {
-        .flowchart-operator-body:before {
-          content: "\f001";
-        }
-      }
-
-      .o_operator_icon_circle-o {
-        .flowchart-operator-body:before {
-          content: "\f10c";
-        }
-      }
-
-      .o_operator_icon_stop-circle-o {
-        .flowchart-operator-body:before {
-          content: "\f28e";
-        }
-      }
-
-      .o_operator_icon_play-circle-o {
-        .flowchart-operator-body:before {
-          content: "\f01d";
-        }
-      }
-
-      .o_operator_icon_tty {
-        .flowchart-operator-body:before {
-          content: "\f1e4";
-        }
-      }
-
-      .o_operator_icon_user-circle {
-        .flowchart-operator-body:before {
-          content: "\f2bd";
-        }
-      }
-
-      .o_flow_operator_overlay {
-        position: absolute;
-        top: 2px;
-        right: 0px;
-
-        .o_flow_operator_overlay_button {
-          cursor: pointer;
-          width: 22px;
-          .fa {
-            font-size: 20px;
-          }
-        }
-      }
-    }
-  }
 }

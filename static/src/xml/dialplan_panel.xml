@@ -10,8 +10,8 @@
         <table class="o_flow_panel_link_table">
           <thead>
             <tr>
-              <th>事件</th>
-              <th>节点</th>
+              <th>Event</th>
+              <th>Next Node</th>
             </tr>
           </thead>
           <tbody>

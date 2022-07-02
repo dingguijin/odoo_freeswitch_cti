@@ -22,7 +22,9 @@
             'odoo_freeswitch_cti/static/src/xml/*.xml'
         ],
         'web.assets_backend': [
-            'odoo_freeswitch_cti/static/scss/*.scss',
+            'odoo_freeswitch_cti/static/src/scss/dialplan_view.scss',
+            
+            'odoo_freeswitch_cti/static/lib/js/jquery.flowchart/jquery.flowchart.css',
             
             'odoo_freeswitch_cti/static/lib/js/jquery.panzoom/jquery.panzoom.js',
             'odoo_freeswitch_cti/static/lib/js/jquery.flowchart/jquery.flowchart.js',

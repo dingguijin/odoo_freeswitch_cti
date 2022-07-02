@@ -371,36 +371,25 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
         _renderZoom: function () {
         },
 
+        _debounceRenderZoom: function() {
+            _.debounce(this._rerenderZoom.bind(this), 1000, false)();
+        },
+        
         _rerenderZoom: function () {
             var self = this;
-            if (this.isZoomRendering) {
-                this.isZoomPending = true;
-                return;
-            }
-            this.isZoomRendering = true;
-            setTimeout(function () {
-                html2canvas(self.$flowchart[0]).then(function (canvas) {
-                    // draw view point
-                    self._drawViewPointRect(canvas);
-                    /* 
-                    var img = new Image();
-                    img.src = canvas.toDataURL("image/png");
-                    self.$zoom.empty();
-                    self.$zoom.append(img);
-                    */
-                    if (self.$zoom.find("canvas")) {
-                        self.$zoom.find("canvas").remove();
-                    }
-                    self.$zoom[0].appendChild(canvas);
-
-                    self.isZoomRendering = false;
-                    if (self.isZoomPending) {
-                        setTimeout(function () {
-                            self.isZoomPending = false;
-                            self._rerenderZoom();
-                        });
-                    }
-                });
+            html2canvas(self.$flowchart[0]).then(function (canvas) {
+                // draw view point
+                self._drawViewPointRect(canvas);
+                /* 
+                   var img = new Image();
+                   img.src = canvas.toDataURL("image/png");
+                   self.$zoom.empty();
+                   self.$zoom.append(img);
+                */
+                if (self.$zoom.find("canvas")) {
+                    self.$zoom.find("canvas").remove();
+                }
+                self.$zoom[0].appendChild(canvas);
             });
         },
 
@@ -534,7 +523,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
                 },
 
                 onAfterChange: function (changeType) {
-                    self._rerenderZoom();
+                    self._debounceRenderZoom();
                 }
 
             });
