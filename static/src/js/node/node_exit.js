@@ -9,7 +9,7 @@ odoo.define('freeswitch_cti.node_exit', function (require) {
             return "exit";
         },
         node_name: function() {
-            return "Exit Flow";
+            return "Exit Dialplan";
         },
         node_icon: function() {
             return "stop-circle-o";

@@ -174,8 +174,31 @@
 
             .o_operator_icon {
                 width: 220px;
-            }
 
+                .flowchart-operator-title {
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .o_flow_operator_overlay {
+                    position: absolute;
+                    right: 0px;
+                    top: 0px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    flex-direction: row-reverse;                               
+                    .o_flow_operator_overlay_button {
+                        cursor: pointer;
+                        width: 22px;
+                        .fa {
+                            font-size: 20px;
+                        }
+                    }
+                }
+            }
+            
             .flowchart-operator-body {
                 text-align: center;
                 &:before {
@@ -185,6 +208,15 @@
                     text-rendering: auto;
                     -webkit-font-smoothing: antialiased;
                     -moz-osx-font-smoothing: grayscale;
+                }
+            }
+
+            .flowchart-operator-connector-set {
+                .flowchart-operator-connector-arrow {
+                    top: 5px !important;
+                }
+                .flowchart-operator-connector-small-arrow {
+                    top: 10px !important;
                 }
             }
 
@@ -221,20 +253,6 @@
             .o_operator_icon_user-circle {
                 .flowchart-operator-body:before {
                     content: "\f2bd";
-                }
-            }
-
-            .o_flow_operator_overlay {
-                position: absolute;
-                top: 2px;
-                right: 0px;
-
-                .o_flow_operator_overlay_button {
-                    cursor: pointer;
-                    width: 22px;
-                    .fa {
-                        font-size: 20px;
-                    }
                 }
             }
         }
