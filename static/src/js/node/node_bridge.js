@@ -19,7 +19,11 @@ odoo.define('freeswitch_cti.node_bridge', function (require) {
         node_icon: function() {
             return "exchange";
         },
-        
+
+        node_seq: function() {
+            return 5;
+        },
+
         flow_types: function() {
             return ["incoming_call"];
         }

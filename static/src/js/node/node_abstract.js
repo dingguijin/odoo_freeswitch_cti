@@ -61,6 +61,10 @@ odoo.define('freeswitch_cti.node_abstract', function (require) {
             return null;
         },
 
+        node_seq: function() {
+            return 9999;
+        },
+        
         flow_types: function() {
             return null;
         },

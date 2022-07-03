@@ -16,6 +16,9 @@ odoo.define('freeswitch_cti.node_start', function (require) {
         },
         node_icon: function() {
             return "circle-o";
+        },
+        node_seq: function() {
+            return 0;
         }
     });
 

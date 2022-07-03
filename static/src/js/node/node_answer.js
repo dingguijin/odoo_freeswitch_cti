@@ -19,6 +19,10 @@ odoo.define('freeswitch_cti.node_answer', function (require) {
         node_icon: function() {
             return "phone";
         },
+
+        node_seq: function() {
+            return 5;
+        },
         
         flow_types: function() {
             return ["incoming_call"];

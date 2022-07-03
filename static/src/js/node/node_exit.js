@@ -14,6 +14,11 @@ odoo.define('freeswitch_cti.node_exit', function (require) {
         node_icon: function() {
             return "stop-circle-o";
         },
+
+        node_seq: function() {
+            return 1;
+        }
+
     });
 
     NodeRegistry.add("exit", new NodeExit());

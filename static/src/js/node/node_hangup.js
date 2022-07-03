@@ -19,7 +19,11 @@ odoo.define('freeswitch_cti.node_hangup', function (require) {
         node_icon: function() {
             return "tty";
         },
-        
+
+        node_seq: function() {
+            return 99;
+        },
+
         flow_types: function() {
             return ["incoming_call"];
         }

@@ -135,22 +135,23 @@
 
             .o_flow_toolbar_item {
                 width: 180px;
-                height: 80px;
-                min-height: 80px;
-                max-height: 80px;
+                height: 40px;
+                min-height: 40px;
+                max-height: 40px;
                 padding: 10px;
                 display: flex;
                 flex-direction: row;
 
                 align-items: center;
                 cursor: pointer;
+                border-bottom: 2px solid #CCCCCC;
 
                 &:hover {
                     background-color: lightgray;
                 }
 
                 span {
-                    font-size: 40px;
+                    font-size: 18px;
                     display: inline-flex !important;
                 }
 
@@ -272,6 +273,103 @@
             .o_operator_icon_phone {
                 .flowchart-operator-body:before {
                     content: "\f095";
+                }
+            }
+
+            .o_operator_icon_gear {
+                .flowchart-operator-body:before {
+                    content: "\f013";
+                }
+            }
+
+            .o_operator_icon_handshake-o {
+                .flowchart-operator-body:before {
+                    content: "\f2b5";
+                }
+            }
+
+
+            .o_operator_icon_trash-o {
+                .flowchart-operator-body:before {
+                    content: "\f014";
+                }
+            }
+
+            .o_operator_icon_group {
+                .flowchart-operator-body:before {
+                    content: "\f0c0";
+                }
+            }
+
+            .o_operator_icon_headphone {
+                .flowchart-operator-body:before {
+                    content: "\f025";
+                }
+            }
+
+            .o_operator_icon_microphone {
+                .flowchart-operator-body:before {
+                    content: "\f130";
+                }
+            }
+
+            .o_operator_icon_phone-square {
+                .flowchart-operator-body:before {
+                    content: "\f098";
+                }
+            }
+
+            .o_operator_icon_volume-control-phone {
+                .flowchart-operator-body:before {
+                    content: "\f2a0";
+                }
+            }
+
+            .o_operator_icon_whatsapp {
+                .flowchart-operator-body:before {
+                    content: "\f232";
+                }
+            }
+
+            .o_operator_icon_telegram {
+                .flowchart-operator-body:before {
+                    content: "\f2c6";
+                }
+            }
+
+            .o_operator_icon_wechat {
+                .flowchart-operator-body:before {
+                    content: "\f1d7";
+                }
+            }
+
+            .o_operator_icon_address-card {
+                .flowchart-operator-body:before {
+                    content: "\f2bb";
+                }
+            }
+
+            .o_operator_icon_address-card-o {
+                .flowchart-operator-body:before {
+                    content: "\f2bc";
+                }
+            }
+
+            .o_operator_icon_database {
+                .flowchart-operator-body:before {
+                    content: "\f1c0";
+                }
+            }
+
+            .o_operator_icon_envelope {
+                .flowchart-operator-body:before {
+                    content: "\f0e0";
+                }
+            }
+
+            .o_operator_icon_envelope-o {
+                .flowchart-operator-body:before {
+                    content: "\f003";
                 }
             }
 

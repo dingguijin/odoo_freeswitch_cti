@@ -464,6 +464,9 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
         _renderToolbar: function () {
             var self = this;
             var node_types = this._flowTypeNodes("incoming_call");
+            node_types = _.sortBy(node_types, function(node_item) {
+                return node_item.node_seq();
+            });
             _.each(node_types, function (node_item) {
                 var _toolbar_item = $(self._nodeToolbarItem(node_item));
                 _toolbar_item.data("node-type", node_item.node_type());

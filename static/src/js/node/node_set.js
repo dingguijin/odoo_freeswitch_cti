@@ -1,27 +1,27 @@
-odoo.define('freeswitch_cti.node_assignment', function (require) {
+odoo.define('freeswitch_cti.node_set', function (require) {
     "use strict";
 
     var NodeAbstract = require('freeswitch_cti.node_abstract');
     var NodeRegistry = require('freeswitch_cti.node_registry');
 
-    var NodeAssignment = NodeAbstract.extend({
+    var Node = NodeAbstract.extend({
         node_path: function() {
             return ["SUCCESS"];
         },
         
         node_type: function() {
-            return "assignment";
+            return "set";
         },
         node_name: function() {
-            return "Assign Agent";
+            return "Set";
         },
 
         node_icon: function() {
-            return "user-circle";
+            return "gear";
         },
 
         node_seq: function() {
-            return 6;
+            return 2;
         },
 
         flow_types: function() {
@@ -29,8 +29,8 @@ odoo.define('freeswitch_cti.node_assignment', function (require) {
         }
     });
 
-    NodeRegistry.add("assignment", new NodeAssignment());
+    NodeRegistry.add("set", new Node());
     
-    return NodeAssignment;
+    return Node;
 });
 

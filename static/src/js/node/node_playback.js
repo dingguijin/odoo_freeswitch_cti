@@ -43,6 +43,10 @@ odoo.define('freeswitch_cti.node_playback', function (require) {
             return "play-circle-o";
         },
 
+        node_seq: function() {
+            return 5;
+        },
+
         flow_types: function() {
             return ["incoming_call"];
         }
