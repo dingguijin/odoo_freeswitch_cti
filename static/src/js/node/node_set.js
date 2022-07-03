@@ -24,6 +24,22 @@ odoo.define('freeswitch_cti.node_set', function (require) {
             return 2;
         },
 
+        node_params: function() {
+            return [
+                {
+                    param_name: "variable",
+                    param_display: "Variable",
+                    param_type: "input"
+                },
+
+                {
+                    param_name: "value",
+                    param_display: "Value",
+                    param_type: "input"
+                }
+            ];
+        },
+        
         flow_types: function() {
             return ["incoming_call"];
         }

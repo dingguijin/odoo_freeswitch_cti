@@ -22,6 +22,7 @@ odoo.define('freeswitch_cti.panel_input', function (require) {
         init: function (parent, options) {
             this._super.apply(this, arguments);
             this.input = options.input;
+            this.hide_buttons = options.hide_buttons || false;
             console.log("PanelInput options", options);
         },
         /**

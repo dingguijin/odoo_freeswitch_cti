@@ -36,13 +36,20 @@ odoo.define('freeswitch_cti.panel_link', function (require) {
             var self = this;
             _.each(this.node.node_path, function (path) {
                 var _id = "#o_flow_panel_node_select_" + path;
-                self.$(_id).select2({
-                    multiple: false,
-                    placeholder: "Next Node",
-                    allowClear: true,
-                    data: nodes,
-                });
+                // self.$(_id).select2({
+                //     multiple: false,
+                //     placeholder: "Next Node",
+                //     allowClear: true,
+                //     data: nodes,
+                // });
 
+                _.each(nodes, function(operator_node) {
+                    self.$(_id).append($('<option/>', {
+                        value:  operator_node.id,
+                        text: operator_node.text
+                    }));
+                });
+                
                 // render link in right panel attributes             
                 _.each(self.node.links, function (_link) {
                     if (_link.fromOperator == self.node.node_id && _link.fromConnector == path) {

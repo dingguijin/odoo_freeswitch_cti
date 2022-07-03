@@ -4,6 +4,7 @@ odoo.define('freeswitch_cti.node_abstract', function (require) {
     var Class = require("web.Class");
     var PanelInput = require("freeswitch_cti.panel_input");
     var PanelLink = require("freeswitch_cti.panel_link");
+    var PanelParams = require("freeswitch_cti.panel_params");
     
     var NodeAbstract = Class.extend({
 
@@ -47,8 +48,32 @@ odoo.define('freeswitch_cti.node_abstract', function (require) {
         },
 
         node_panel_parameters: function(widget, node) {
+            var params = this.node_params(node);
+            if (!params) {
+                return;
+            }
+            _.each(params, function(param) {
+                param.node_id = node.node_id;
+            });
+
+            // load node parameter
+            if (node.node_param) {
+                var node_params = JSON.parse(node.node_param);
+                _.each(params, function(param) {
+                    if (node_params[param.param_name] != undefined) {
+                        param.param_value = node_params[param.param_name].param_value;
+                    }
+                });
+            }
+            
+            var panel_params_widget = new PanelParams(widget, {params: params});
+            panel_params_widget.appendTo(widget.el);
         },
 
+        node_params: function() {
+            return null;
+        },
+        
         node_type: function() {
             return null;
         },

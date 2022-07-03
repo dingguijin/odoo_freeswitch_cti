@@ -20,7 +20,7 @@
                 <td><strong><t t-esc="path"/></strong></td>
                 <td class="o_flow_panel_node_td">
                   <div>
-                    <input class="o_flow_panel_node_select form-control" t-attf-id="{{'o_flow_panel_node_select_'+path}}" type="select"/>
+                    <select class="o_flow_panel_node_select form-control" t-attf-id="{{'o_flow_panel_node_select_'+path}}" type="select"/>
                   </div>
                 </td>
               </tr>
@@ -41,7 +41,7 @@
           <div class="o_flow_panel_card_input">
             <input t-att-name="widget.input.name" t-att-value="widget.input.value"/>
           </div>
-          <div class="o_flow_panel_card_input_button">
+          <div class="o_flow_panel_card_input_button" t-if="!widget.hide_buttons">
             <span class="o_flow_panel_card_input_button_ok fa fa-check"></span>
             <span class="o_flow_panel_card_input_button_cancel fa fa-close"></span>
           </div>
@@ -50,6 +50,29 @@
     </div>
   </t>
 
+  <t t-name="panel_params_template">
+    <div class="o_flow_panel_card">
+      <div class="o_flow_panel_card_title">
+        Node Parameters
+      </div>
+
+      <div class="o_flow_panel_card_body">
+        
+        <div class="o_flow_panel_params">
+          
+          <div class="o_flow_panel_params_params">
+            
+          </div>
+          <div class="o_flow_panel_params_buttons">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Discard</button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </t>
+  
   <t t-name="panel_widget_template">
     <div class="o_flow_panel_widget">
     </div>
