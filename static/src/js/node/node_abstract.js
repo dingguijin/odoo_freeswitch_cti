@@ -52,21 +52,18 @@ odoo.define('freeswitch_cti.node_abstract', function (require) {
             if (!params) {
                 return;
             }
-            _.each(params, function(param) {
-                param.node_id = node.node_id;
-            });
 
             // load node parameter
-            if (node.node_param) {
-                var node_params = JSON.parse(node.node_param);
+            if (node.node_param != undefined) {
+                var node_params = JSON.parse(node.node_param || "{}");
                 _.each(params, function(param) {
                     if (node_params[param.param_name] != undefined) {
-                        param.param_value = node_params[param.param_name].param_value;
+                        param.param_value = node_params[param.param_name];
                     }
                 });
             }
             
-            var panel_params_widget = new PanelParams(widget, {params: params});
+            var panel_params_widget = new PanelParams(widget, {params: params, node: node});
             panel_params_widget.appendTo(widget.el);
         },
 

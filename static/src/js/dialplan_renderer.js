@@ -26,7 +26,8 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
         custom_events: {
             "panel_create_link": '_onPanelCreateLink',
             "panel_remove_link": '_onPanelRemoveLink',
-            "panel_change_operator_title": "_onPanelChangeOperatorTitle"
+            "panel_change_operator_title": "_onPanelChangeOperatorTitle",
+            "panel_change_operator_param": "_onPanelChangeOperatorParam",
         },
 
         init: function (parent, state, params) {
@@ -148,6 +149,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
                             node_id: node.id,
                             node_type: node.node_type,
                             node_path: _node_class.node_path(),
+                            node_param: node.node_param,
                         },
                         "class": "o_operator_icon o_operator_icon_" + _node_class.node_icon(),
                         title: node.name,
@@ -191,6 +193,12 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
             });
 
             return { links: _links, operators: _operators };
+        },
+
+        _onPanelChangeOperatorParam: function (event) {
+            var operator_clone = this.$flowchart.flowchart("getOperatorData", event.data.operator_id);
+            operator_clone.properties.node.node_param = event.data.node_param;
+            this.$flowchart.flowchart("setOperatorData", event.data.operator_id, operator_clone);
         },
 
         _onPanelChangeOperatorTitle: function (event) {
@@ -440,7 +448,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
             console.log("renderOperatorPanel", operator);
             this.$el.find(".o_flow_panel").empty();
             var data = this.$flowchart.flowchart("getDataRef");
-            var node = operator.properties.node;
+            var node = Object.assign(operator.properties.node);
             node.operator = data.operators[node.node_id];
             node.operators = data.operators;
             node.links = data.links;

@@ -34,6 +34,14 @@ odoo.define('freeswitch_cti.panel_input', function (require) {
             return this._super.apply(this, arguments);
         },
 
+        // for params load and save
+        get_widget_value: function() {
+            return this.$el.find("input[name='" + this.input.name + "']").val();
+        },
+
+        set_widget_value: function(v) {
+            this.$el.find("input[name='" + this.input.name + "']").val(v);
+        },
         //--------------------------------------------------------------------------
         // Handlers
         //--------------------------------------------------------------------------

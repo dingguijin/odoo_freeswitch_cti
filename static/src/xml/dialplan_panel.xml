@@ -64,8 +64,8 @@
             
           </div>
           <div class="o_flow_panel_params_buttons">
-            <button class="btn btn-primary">Save</button>
-            <button class="btn btn-secondary">Discard</button>
+            <button class="btn btn-primary o_flow_panel_card_params_button_save">Save</button>
+            <button class="btn btn-secondary o_flow_panel_card_params_button_discard">Discard</button>
           </div>
           
         </div>
