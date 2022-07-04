@@ -70,7 +70,10 @@ class CTIWorker(Worker):
             _thread = self.get_cti_thread(dbname)
             _thread.start()
             self.threads[dbname] = _thread
-
+        time.sleep(10)
+        # process work will be called every timeslice
+        # need sleep to release CPU
+            
     def get_cti_thread(dbname):
         pass
 
@@ -99,7 +102,7 @@ class CTIInboundThread(threading.Thread):
 
     def run(self):
         _logger.info("CTIInboundThread start.")
-        asyncio.run(self.cti.run_loop())
+        #asyncio.run(self.cti.run_loop())
         _logger.info("CTIInboundThread stopped.")
         
 class CTIOutboundThread(threading.Thread):
@@ -114,7 +117,7 @@ class CTIOutboundThread(threading.Thread):
         
     def run(self):
         _logger.info("CTIOutboundThread started.")            
-        asyncio.run(self.cti.run_loop())
+        #asyncio.run(self.cti.run_loop())
         _logger.info("CTIOutboundThread stopped.")            
 
     def stop(self):
