@@ -14,5 +14,6 @@ from abastract_nodeclass import AbstractNodeClass
 
 class start_NodeClass(AbstractNodeClass):
 
-    def __init__(self, event):
-        return
+    def execute_node(self, event):
+        self.return_result_event("SUCCESS")
+        

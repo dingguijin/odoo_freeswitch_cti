@@ -94,7 +94,7 @@ class ResUsers(models.Model):
             record.agent_name = "%s@default" % record.sip_number
         return
 
-    @api.depends('groups_id')
+    @api.depends('groups_id', 'sip_number', 'sip_password')
     def _compute_is_callcenter_agent(self):
         for record in self:
             if record.sip_number and record.has_group("odoo_freeswitch_cti.group_sip_user"):
@@ -103,7 +103,7 @@ class ResUsers(models.Model):
                 record.is_callcenter_agent = False
         return
 
-    @api.depends('groups_id')
+    @api.depends('groups_id', 'sip_number', 'sip_password')
     def _compute_is_callcenter_supervisor(self):
         for record in self:
             if record.sip_number and record.has_group("odoo_freeswitch_cti.group_sip_supervisor"):

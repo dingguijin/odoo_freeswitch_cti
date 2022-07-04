@@ -80,6 +80,7 @@ class FreeSwitchOutbound():
         asyncio.run(self._stop())
 
     async def _client_connected_cb(reader, writer):
+        _logger.info("NEW 111111111111111111111111111111")
         _uuid = str(uuid.uuid())
         self.streams[_uuid] = OutboundStream(self, _uuid, reader, writer)
         await self.streams[_uuid].start_stream()
@@ -120,7 +121,8 @@ class OutboundStream():
         self.extension_ids = ()
         self.current_dialplan = None
         self.current_node = None
-        
+
+        self._tmp_headers = {}
         return
 
     async def start_stream(self):

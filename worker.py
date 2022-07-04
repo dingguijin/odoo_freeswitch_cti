@@ -102,7 +102,7 @@ class CTIInboundThread(threading.Thread):
 
     def run(self):
         _logger.info("CTIInboundThread start.")
-        #asyncio.run(self.cti.run_loop())
+        asyncio.run(self.cti.run_loop())
         _logger.info("CTIInboundThread stopped.")
         
 class CTIOutboundThread(threading.Thread):
@@ -117,7 +117,7 @@ class CTIOutboundThread(threading.Thread):
         
     def run(self):
         _logger.info("CTIOutboundThread started.")            
-        #asyncio.run(self.cti.run_loop())
+        asyncio.run(self.cti.run_loop())
         _logger.info("CTIOutboundThread stopped.")            
 
     def stop(self):
