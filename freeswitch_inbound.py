@@ -20,7 +20,7 @@ from . import freeswitch_info
 
 _logger = logging.getLogger(__name__)
 
-class FreeSwitchClient():
+class FreeSwitchInbound():
     def __init__(self, dbname):
         self.dbname = dbname
 
@@ -43,22 +43,15 @@ class FreeSwitchClient():
         return
 
     async def _stop(self):
-        await self.writer.drain()
-        self.writer.close()
-        await self.writer.closed()
-        odoo.sql_db.close_db(self.dbname)
-
-        self.is_stop = False
-        self.client_status = "NULL" # AUTH
-        self.bgapi_commands = collections.deque([])
-        self.jobs = {}
-
+        # self.client_status = "NULL" # AUTH
+        # self.bgapi_commands = collections.deque([])
+        # self.jobs = {}
         return
-
+    
     async def _run_command_loop(self):
         while True:
             if self.is_stop:
-                self._stop()
+                await self._stop()
                 break
             if self.client_status == "SUBSCRIBED":
                 self._dispatch_cti_commands()
@@ -95,11 +88,11 @@ class FreeSwitchClient():
         self._tmp_headers = {}
         return True
 
-    async def _run_cti_loop(self):
+    async def _run_inbound_loop(self):
         while True:
             if self.is_stop:
-                self._stop()
-                return
+                break
+            
             try:
                 self.reader, self.writer = await asyncio.open_connection(self.freeswitch_info["freeswitch_ip"], 8021)
             except:
@@ -112,7 +105,6 @@ class FreeSwitchClient():
             self.client_status = "NULL"
             while True:
                 if self.is_stop:
-                    self._stop()
                     return
                 try:
                     _timeout = 30
@@ -134,11 +126,10 @@ class FreeSwitchClient():
         # if not _freeswitch:
         #     _logger.error("No freeswitch, exit CTI.")
         #     return
-        
         self.freeswitch_info = freeswitch_info._FREESWITCH_INFO
-        
         await asyncio.gather(self._run_command_loop(),
-                             self._run_cti_loop())
+                             self._run_inbound_loop())
+        odoo.sql_db.close_db(self.dbname)
         return
     
     def _is_meta_headers(self, headers):
@@ -194,6 +185,9 @@ class FreeSwitchClient():
         return
 
     def _handle_command_reply(self, headers):
+        if not len(self.bgapi_commands):
+            return
+
         _job_uuid = headers.get("Job-UUID")
         if _job_uuid:
             _command = self.bgapi_commands.popleft()

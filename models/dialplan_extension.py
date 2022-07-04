@@ -22,6 +22,7 @@ class DialplanExtension(models.Model):
     is_continue = fields.Boolean("Is Continue", default=False)
     condition = fields.Char("Condition")
 
+    # less is higher
     priority = fields.Integer("Priority", default=1)
 
     is_active = fields.Boolean("Is Active", default=True)

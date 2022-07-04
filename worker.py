@@ -11,7 +11,8 @@ import odoo
 from odoo.service.server import Worker
 from odoo.service.server import PreforkServer
 
-from . import freeswitch_client
+from . import freeswitch_inbound
+from . import freeswitch_outbound
 
 _logger = logging.getLogger(__name__)
 
@@ -26,14 +27,14 @@ def worker():
     old_process_spawn = PreforkServer.process_spawn
     def process_spawn(self):
         old_process_spawn(self)
-        if not hasattr(self, "cti_command_workers"):
-            self.cti_command_workers = {}
-        if not hasattr(self, "cti_notification_workers"):
-            self.cti_notification_workers = {}            
-        if not self.cti_command_workers:
-            self.worker_spawn(CTICommandWorker, self.cti_command_workers)
-        # if not self.cti_notification_workers:
-        #     self.worker_spawn(CTINotificationWorker, self.cti_notification_workers)
+        if not hasattr(self, "cti_inbound_workers"):
+            self.cti_inbound_workers = {}
+        if not hasattr(self, "cti_outbound_workers"):
+            self.cti_outbound_workers = {}            
+        if not self.cti_inbound_workers:
+            self.worker_spawn(CTIInboundWorker, self.cti_inbound_workers)
+        if not self.cti_outbound_workers:
+            self.worker_spawn(CTIOutboundWorker, self.cti_outbound_workers)
     PreforkServer.process_spawn = process_spawn
 
 class CTIWorker(Worker):
@@ -44,7 +45,6 @@ class CTIWorker(Worker):
 
     def signal_handler(self, sig, frame):
         super().signal_handler(sig, frame)
-        #_logger.info(">>>>>>>>>>>>>>>>>>>CTIWORKER RECEIVE SIGNAL %s", self.alive)
         
     def start(self):
         super(CTIWorker, self).start()
@@ -67,82 +67,59 @@ class CTIWorker(Worker):
         for dbname in db_names:
             if self.threads.get(dbname, False):
                 continue
-
             _thread = self.get_cti_thread(dbname)
             _thread.start()
             self.threads[dbname] = _thread
-                
-        time.sleep(self.interval)
 
     def get_cti_thread(dbname):
         pass
 
-class CTICommandWorker(CTIWorker):
+class CTIInboundWorker(CTIWorker):
     def get_cti_thread(self, dbname):
-        return CTICommandThread(dbname)
+        return CTIInboundThread(dbname)
 
-class CTINotificationWorker(CTIWorker):
+class CTIOutboundWorker(CTIWorker):
     def get_cti_thread(self, dbname):
-        return CTINotificationThread(dbname)
+        return CTIOutboundThread(dbname)
 
-class CTICommandThread(threading.Thread):
+class CTIInboundThread(threading.Thread):
     """
     """
 
     def stop(self):
-        _logger.info("stoping ..... CTICommandThread")
-        self.is_stop = True
+        _logger.info("stoping ..... CTIInboundThread")
+        self.cti.stop()
         return
 
     def __init__(self, dbname):
-        threading.Thread.__init__(self, name='CTICommandThread')
+        threading.Thread.__init__(self, name='CTIInboundThread')
         threading.current_thread().dbname = dbname
-        
         self.daemon = True
-        self.dbname = dbname
-        self.is_stop = False
-
-        self.cti_client = freeswitch_client.FreeSwitchClient(self.dbname)
+        self.cti = freeswitch_inbound.FreeSwitchInbound(dbname)
 
     def run(self):
-        _logger.info("CTICommandThread start.")
-        while True:
-            if self.is_stop:
-                self.cti_client.stop()
-                break
-            # FIXME: run two async io tasks
-            # one for database/ another for cti
-            asyncio.run(self.cti_client.run_loop())
-            time.sleep(1)
-
-class CTINotificationThread(threading.Thread):
+        _logger.info("CTIInboundThread start.")
+        asyncio.run(self.cti.run_loop())
+        _logger.info("CTIInboundThread stopped.")
+        
+class CTIOutboundThread(threading.Thread):
     """
     """
 
     def __init__(self, dbname):
-        threading.Thread.__init__(self, name='CTINotificationThread')
+        threading.Thread.__init__(self, name='CTIOutboundThread')
         threading.current_thread().dbname = dbname
-
         self.daemon = True
-        self.dbname = dbname
-        self.is_stop = False
+        self.cti = freeswitch_outbound.FreeSwitchOutbound(dbname)
         
     def run(self):
-        _logger.info("CTINotificationThread started.")
-
-        # self.db = odoo.sql_db.db_connect(self.dbname)
-        # with db.cursor() as cr:
-            
-        while True:
-            if self.is_stop:
-                break
-            
-            _logger.info("IN CTINOTIFICATIONTHREAD")
-            time.sleep(10)
+        _logger.info("CTIOutboundThread started.")            
+        asyncio.run(self.cti.run_loop())
+        _logger.info("CTIOutboundThread stopped.")            
 
     def stop(self):
-        self.is_stop = True
-        _logger.info("stoping ..... CTINotificationThread")
+        self.cti.stop()
+        _logger.info("stoping ..... CTIOutboundThread")
         return
 
 
