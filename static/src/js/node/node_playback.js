@@ -43,6 +43,16 @@ odoo.define('freeswitch_cti.node_playback', function (require) {
             return "play-circle-o";
         },
 
+        node_params: function() {
+            return [
+                {
+                    param_name: "data",
+                    param_display: "Data",
+                    param_type: "input"
+                }
+            ];
+        },
+
         node_seq: function() {
             return 5;
         },

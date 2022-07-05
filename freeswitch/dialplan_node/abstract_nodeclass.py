@@ -6,6 +6,7 @@
 #
 #
 
+import json
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -15,12 +16,18 @@ class AbastractNodeClass():
         self.stream = event.get("stream")
         self.event = event.get("event")
         self.node = event.get("node")
+
+        self.node_param = node.get("node_param") or "{}"
+        self.node_param = json.loads(self.node_param)
         return
 
     def execute_node(self, event):
-        return
+        pass
 
     def return_result_event(self, result):
         self.stream.server.push_node_event(self.stream, self.node, result)
         return
 
+    def send_esl_execute(self, app, arg=""):
+        self.stream._send_esl_execute(app, arg)
+        return

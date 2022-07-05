@@ -373,6 +373,12 @@
                 }
             }
 
+            .o_operator_icon_th {
+                .flowchart-operator-body:before {
+                    content: "\f00a";
+                }
+            }
+
         }
     }
 }

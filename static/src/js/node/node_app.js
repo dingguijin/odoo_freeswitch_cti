@@ -1,4 +1,4 @@
-odoo.define('freeswitch_cti.node_bridge', function (require) {
+odoo.define('freeswitch_cti.node_app', function (require) {
     "use strict";
 
     var NodeAbstract = require('freeswitch_cti.node_abstract');
@@ -10,22 +10,28 @@ odoo.define('freeswitch_cti.node_bridge', function (require) {
         },
         
         node_type: function() {
-            return "bridge";
+            return "app";
         },
         node_name: function() {
-            return "Bridge";
+            return "App";
         },
 
         node_icon: function() {
-            return "exchange";
+            return "th";
         },
 
         node_seq: function() {
-            return 5;
+            return 2;
         },
 
         node_params: function() {
-            return [      
+            return [
+                {
+                    param_name: "app",
+                    param_display: "Application",
+                    param_type: "input"
+                },
+
                 {
                     param_name: "data",
                     param_display: "Data",
@@ -33,13 +39,13 @@ odoo.define('freeswitch_cti.node_bridge', function (require) {
                 }
             ];
         },
-
+        
         flow_types: function() {
             return ["incoming_call"];
         }
     });
 
-    NodeRegistry.add("bridge", new Node());
+    NodeRegistry.add("set", new Node());
     
     return Node;
 });

@@ -194,7 +194,7 @@ class OutboundStream():
         self.writer.write(cmd)
         return
 
-    def _send_esl_execute(self, app, arg):
+    def _send_esl_execute(self, app, arg=""):
         _esl = ["sendmsg",
                 "call-command: execute",
                 "execute-app-name: %s" % app,

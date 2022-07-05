@@ -30,7 +30,7 @@ odoo.define('freeswitch_cti.DialplanModel', function (require) {
          * @returns {Promise}
          */
         load: function (params) {
-            this.res_id = params.res_id;
+            this.res_id = params.res_id || params.res_ids[0];
             return this._fetchInfo();
         },
         
@@ -56,7 +56,7 @@ odoo.define('freeswitch_cti.DialplanModel', function (require) {
             return this._rpc({
                 route: '/freeswitch_cti/dialplan/get_info',
                 params: {
-                    id: this.res_id
+                    id: self.res_id
                 },
             }).then(function (data) {
                 self.nodes = data.nodes;
