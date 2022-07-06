@@ -5,7 +5,7 @@ odoo.define('freeswitch_cti.DialplanController', function (require) {
     var core = require('web.core');
     var Dialog = require('web.Dialog');
     var view_dialogs = require('web.view_dialogs');
-
+    
     var _t = core._t;
     var QWeb = core.qweb;
     var FormViewDialog = view_dialogs.FormViewDialog;
@@ -15,6 +15,7 @@ odoo.define('freeswitch_cti.DialplanController', function (require) {
      */
     var Controller = AbstractController.extend({
         custom_events: {
+            switch_view: '_onSwitchView',
         },
 
         /**
@@ -26,7 +27,7 @@ odoo.define('freeswitch_cti.DialplanController', function (require) {
          */
         init: function (parent, model, renderer, params) {
             this._super.apply(this, arguments);
-            this.currentId = params.currentId;
+            this.currentId = params.initialState.res_id;
         },
 
         //--------------------------------------------------------------------------
@@ -50,6 +51,23 @@ odoo.define('freeswitch_cti.DialplanController', function (require) {
             this.$buttons.appendTo($node);
         },
 
+        on_attach_callback: function () {
+            this._super.apply(this, arguments);            
+        },
+
+        update: async function(params, options) {
+            var self = this;
+            this.currentId = params.currentId;
+            this._super.apply(this, arguments).then(function() {
+                var state = self.model.get();
+                self.renderer.stateToFlowchart(state);
+            });
+        },
+
+        getTitle: function () {
+            return this.model.getName(this.handle);
+        },
+
         _updateButtons: function () {
         },
 
@@ -63,6 +81,11 @@ odoo.define('freeswitch_cti.DialplanController', function (require) {
             this.renderer.stateToFlowchart(state);
         },
 
+        _onSwitchView: function (ev) {   
+            this._super.apply(this, arguments);
+            ev.data.res_id = this.currentId;
+        },
+        
         //--------------------------------------------------------------------------
         // Handlers
         //--------------------------------------------------------------------------

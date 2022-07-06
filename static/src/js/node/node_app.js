@@ -13,7 +13,7 @@ odoo.define('freeswitch_cti.node_app', function (require) {
             return "app";
         },
         node_name: function() {
-            return "App";
+            return "Application";
         },
 
         node_icon: function() {
@@ -34,7 +34,7 @@ odoo.define('freeswitch_cti.node_app', function (require) {
 
                 {
                     param_name: "data",
-                    param_display: "Data",
+                    param_display: "Application Data",
                     param_type: "input"
                 }
             ];
@@ -45,7 +45,7 @@ odoo.define('freeswitch_cti.node_app', function (require) {
         }
     });
 
-    NodeRegistry.add("set", new Node());
+    NodeRegistry.add("app", new Node());
     
     return Node;
 });

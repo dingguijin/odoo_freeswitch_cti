@@ -67,6 +67,7 @@ if records:
       <field name="model">freeswitch_cti.dialplan_extension</field>
       <field name="arch" type="xml">
         <dialplan string="Dialplan Extension Flow Graph">
+          <field name="id"/>
         </dialplan>
       </field>
     </record>
@@ -92,7 +93,7 @@ if records:
       <field name="name">dialplan.extension.view.form</field>
       <field name="model">freeswitch_cti.dialplan_extension</field>
       <field name="arch" type="xml">
-        <form>
+        <form js_class="dialplan_form">
           <sheet>
             <group>
               <group>

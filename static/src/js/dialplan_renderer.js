@@ -63,10 +63,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
         /*
          * Called each time the renderer is attached into the DOM.
          */
-        on_attach_callback: function () {
-            console.log("on attach callback");
-
-            this.isInDom = true;
+        on_attach_callback: function () {            
             this._initializeFlow();
 
             this._renderToolbar();
@@ -75,6 +72,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
             this._renderZoom();
 
             this.stateToFlowchart();
+            this.isInDom = true;
         },
 
         /*
@@ -255,7 +253,7 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
             var fromOperator = this.$flowchart.flowchart("getOperatorData", fromOperatorId);
             var toOperator = this.$flowchart.flowchart("getOperatorData", toOperatorId);
 
-            // TO CONNECTOR 和 LINKID 一样
+            // TO CONNECTOR LINKID
             // TO CONNECTOR = FROM OPERATOR ID . FROM CONNECTOR . TO OPERATOR ID
             var toConnector = fromOperatorId + "." + fromConnector + "." + toOperatorId;
 
@@ -278,12 +276,15 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
         },
 
         _initializeFlow: function () {
-            if (this.flowIsInit) {
-                return;
-            }
-            this.flowIsInit = true;
+            // if (this.flowIsInit) {
+            //     return;
+            // }            
+            // this.flowIsInit = true;
+            
             var self = this;
 
+            this.$el.empty();
+            
             var flowContainer = document.createElement("div");
             var flowChart = document.createElement("div");
             var toolbarContainer = document.createElement("div");
@@ -475,6 +476,8 @@ odoo.define('freeswitch_cti.DialplanRenderer', function (require) {
             node_types = _.sortBy(node_types, function(node_item) {
                 return node_item.node_seq();
             });
+            self.$toolbar.empty();
+            
             _.each(node_types, function (node_item) {
                 var _toolbar_item = $(self._nodeToolbarItem(node_item));
                 _toolbar_item.data("node-type", node_item.node_type());

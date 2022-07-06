@@ -11,9 +11,7 @@ const AgentListController = ListController.extend({
         owl.Component.env.services.bus_service.onNotification(this, (notifications) => {
             console.log(">>>>>>>>>>>>>>> GET notifications", notifications);
 		    for (const { payload, type } of notifications) {
-
-                if (type == "agent_update") {
-                    
+                if (type == "agent_update") {                    
                     this.trigger_up("reload");
                 }
             }

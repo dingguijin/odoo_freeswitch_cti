@@ -30,16 +30,24 @@ odoo.define('freeswitch_cti.DialplanModel', function (require) {
          * @returns {Promise}
          */
         load: function (params) {
-            this.res_id = params.res_id || params.res_ids[0];
+            this.res_id = params.res_id;
             return this._fetchInfo();
         },
         
-        reload: function() {
+        reload: function(_, params) {
+            this.res_id = params.currentId;
             return this._fetchInfo();
         },
 
         save: function(data) {
             this._updateInfo(data);
+        },
+
+        getName: function() {
+            if (this.dialplan) {
+                return this.dialplan.name;
+            }
+            return "";
         },
 
         //--------------------------------------------------------------------------
@@ -62,7 +70,7 @@ odoo.define('freeswitch_cti.DialplanModel', function (require) {
                 self.nodes = data.nodes;
                 self.dialplan = data.dialplan;
                 self.events = data.events;
-                console.log(data);
+                console.log("dialplan/get_info ", data);
             });
         },
 
