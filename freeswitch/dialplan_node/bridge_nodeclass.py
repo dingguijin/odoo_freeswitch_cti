@@ -17,6 +17,5 @@ class answer_NodeClass(AbstractNodeClass):
     async def execute_node(self, event):
         _data = self.node_param.get("data")
         self.send_esl_execute("bridge", _data)
-        self.return_result_event("SUCCESS")
         return
         

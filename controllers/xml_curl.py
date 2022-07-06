@@ -1659,6 +1659,8 @@ class FreeSwitchXmlCurl(http.Controller):
         _logger.info("DIALPLAN for [%s], [%s]" % (http.request.params["Caller-Caller-ID-Name"],
                                                   http.request.params["Caller-Context"]))
 
+        _logger.info("DIALPLAN for [%s]" % (http.request.params))
+
         if not self._is_hostname_matched():
             return _EMPTY_XML
 

@@ -10,6 +10,7 @@ import asyncio
 import collections
 import json
 import logging
+import re
 import time
 import threading
 import urllib
@@ -129,12 +130,18 @@ class FreeSwitchOutbound():
             _next_node = cr.dictfetchone()
         return _next_node
 
+    def close_stream(self, _id):
+        _stream = self.streams.get(_id)
+        if _stream:
+            del self.streams[_id]
+        return
+
 class OutboundStream():
 
-    def __init__(self, server, _uuid, reader, writer):
+    def __init__(self, server, _id, reader, writer):
         self.status = "NULL"
         self.server = server
-        self.uuid = _uuid
+        self.id = _id
         self.reader = reader
         self.writer = writer
         self.db_connection = server.db_connection
@@ -144,6 +151,8 @@ class OutboundStream():
         self.current_node = None
 
         self._tmp_headers = {}
+
+        self.is_closed = False
         return
 
     async def start_stream(self):
@@ -154,6 +163,12 @@ class OutboundStream():
         self._send_esl_command("event plain all")
 
         while True:
+            if self.reader.at_eof():
+                await asyncio.sleep(1)
+
+            if self.is_closed:
+                break
+
             try:
                 _timeout = 1
                 _header = await asyncio.wait_for(self.reader.readline(), timeout=_timeout)
@@ -202,7 +217,9 @@ class OutboundStream():
         if self.status == "NULL":
             _dialplan = self._hunt_dialplan(headers)
             if not _dialplan:
+                _logger.error("Can not hunt dialplan, close the stream")
                 self._send_esl_hangup()
+                await self._close_stream()
                 return
             self.current_dialplan = _dialplan
             self.status = "INIT"
@@ -231,6 +248,8 @@ class OutboundStream():
                 "execute-app-arg: %s" % arg]
         _esl = "\n".join(_esl) + "\n\n"
         _esl = _esl.encode("utf-8")
+
+        _logger.info("APP -> %s" % _esl)
         self.writer.write(_esl)
         return
 
@@ -268,7 +287,8 @@ class OutboundStream():
         if not _condition:
             return True
         _condition = _condition.strip()
-
+        _logger.info("COndition ------------> %s" % _condition)
+        
         # field="destination_number", expression="^*.$"
         _pattern = "field=[\'\"](\w+)[\'\"]\sexpression=[\'\"](.*)[\'\"]"
         _pattern = re.compile(_pattern)
@@ -318,5 +338,12 @@ class OutboundStream():
 
     def set_current_node(self, node):
         self.current_node = node
+        return
+
+    async def _close_stream(self):
+        self.server.close_stream(self.id)
+        self.writer.close()
+        await self.writer.wait_closed()
+        self.is_closed = True
         return
 
