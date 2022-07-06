@@ -11,17 +11,17 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-class AbastractNodeClass():
+class AbstractNodeClass():
     def __init__(self, event):
         self.stream = event.get("stream")
         self.event = event.get("event")
         self.node = event.get("node")
 
-        self.node_param = node.get("node_param") or "{}"
+        self.node_param = self.node.get("node_param") or "{}"
         self.node_param = json.loads(self.node_param)
         return
 
-    def execute_node(self, event):
+    async def execute_node(self, event):
         pass
 
     def return_result_event(self, result):

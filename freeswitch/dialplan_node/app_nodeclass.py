@@ -10,11 +10,11 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-from abastract_nodeclass import AbstractNodeClass
+from .abstract_nodeclass import AbstractNodeClass
 
 class app_NodeClass(AbstractNodeClass):
 
-    def execute_node(self, event):
+    async def execute_node(self, event):
         _app = self.node_param.get("app")
         _data = self.node_param.get("data")
         self.send_esl_execute(_app, _data)

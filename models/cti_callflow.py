@@ -10,7 +10,8 @@ class CtiCallFlow(models.Model):
 
     # same with profile_index
 
-    cdr_id = fields.Many2one('freeswitch_cti.cti_cdr', 'Cdr')
+    cdr_id = fields.Many2one('freeswitch_cti.cti_cdr', string='Cdr')
+
     name = fields.Char('Name', compute="_compute_name")
     profile_index = fields.Integer('Profile Index')
     
@@ -28,7 +29,7 @@ class CtiCallFlow(models.Model):
     times_progress_media_time = fields.Datetime("Progress Media Time")
     times_answered_time = fields.Datetime("Answered Time")
     times_bridged_time = fields.Datetime("Bridged Time")
-    times_last_hold_name = fields.Datetime("Last Hold Time")
+    times_last_hold_time = fields.Datetime("Last Hold Time")
     times_hold_accum_time = fields.Datetime("Hold Accum Time")
     times_hangup_time = fields.Datetime("Hangup Time")
     times_resurrect_time = fields.Datetime("Resurrect Time")

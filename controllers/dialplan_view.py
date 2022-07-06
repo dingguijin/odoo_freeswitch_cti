@@ -9,14 +9,14 @@ _logger = logging.getLogger(__name__)
 class DialplanView(http.Controller):
     
     @http.route('/freeswitch_cti/dialplan/get_info', type='json', auth='user')
-    def get_dialplan_info(self, id):
+    def get_info(self, id):
         nodes = http.request.env['freeswitch_cti.dialplan_node'].search_read([('extension_id', '=', id)])
         dialplan = http.request.env['freeswitch_cti.dialplan_extension'].search_read([('id', '=', id)])
         events = http.request.env['freeswitch_cti.dialplan_node_event'].search_read([('extension_id', '=', id)])
         return dict(events=events, nodes=nodes, dialplan=dialplan[0])
 
     @http.route('/freeswitch_cti/dialplan/update_info', type='json', auth='user')
-    def update_flow_info(self, id, nodes, events):
+    def update_info(self, id, nodes, events):
         node_class = http.request.env['freeswitch_cti.dialplan_node']
         event_class = http.request.env['freeswitch_cti.dialplan_node_event']
 

@@ -6,16 +6,17 @@
 #
 #
 
+import json
 import logging
 
 _logger = logging.getLogger(__name__)
 
 from .abstract_nodeclass import AbstractNodeClass
 
-class answer_NodeClass(AbstractNodeClass):
+class playback_NodeClass(AbstractNodeClass):
 
     async def execute_node(self, event):
-        self.send_esl_execute("answer")
+        data = self.node_param.get("data")
+        self.send_esl_execute("playback", data)
         self.return_result_event("SUCCESS")
         return
-        

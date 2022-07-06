@@ -18,7 +18,7 @@ class NodeFactory():
     def build(cls, event):
         _node = event.get("node")
         _node_class_name = "%s_NodeClass" % _node.get("node_type")
-        _node_module_name = _node_class_name.lower()
+        _node_module_name = "odoo.addons.odoo_freeswitch_cti.freeswitch.dialplan_node." + _node_class_name.lower()
         _module = importlib.import_module(_node_module_name)
         if not _module:
             _logger.error("no node module for %s" % _node.get("node_type"))

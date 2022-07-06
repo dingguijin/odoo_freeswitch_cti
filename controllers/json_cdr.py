@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 def _from_timestamp(timestamp):
     if not timestamp:
         return None
-    return datetime.datetime.fromtimestamp(timestamp/1000000)
+    return datetime.datetime.fromtimestamp(int(timestamp)/1000000)
 
 class FreeSwitchJsonCdr(http.Controller):
 
@@ -26,7 +26,7 @@ class FreeSwitchJsonCdr(http.Controller):
     @http.route('/freeswitch_json_cdr', type='json', methods=['POST'], auth='none', csrf=False)
     def xml_cdr(self, *args, **kw):
         # _logger.info(http.request.jsonrequest)
-        _logger.info(json.dumps(http.request.jsonrequest, indent=2))
+        # _logger.info(json.dumps(http.request.jsonrequest, indent=2))
 
         _cdr = http.request.jsonrequest
         _variables = _cdr.get("variables")
@@ -38,7 +38,7 @@ class FreeSwitchJsonCdr(http.Controller):
                 if _application.get("app_data").find("record_session::") >=0:
                     _record_file = _application.get("app_data").split("/")[-1]
 
-        _cdr_id = http.request.env["cti_cdr"].sudo().create({
+        _cdr_id = http.request.env["freeswitch_cti.cti_cdr"].sudo().create({
             "name": _variables.get("uuid"),
             "direction": _variables.get("direction"),
             "channel_uuid": _variables.get("uuid"),
@@ -55,12 +55,13 @@ class FreeSwitchJsonCdr(http.Controller):
             "waitsec": _variables.get("waitsec"),
             "record_file": _record_file
         })
+        
         _callflows = _cdr.get("callflow") or []
         for _callflow in _callflows:
             _caller_profile = _callflow.get("caller_profile") or {}
             _times = _callflow.get("times") or {}
-            http.request.env["cti_callflow"].sudo().create({
-                "cdr_id": _cdr_id,
+            http.request.env["freeswitch_cti.cti_callflow"].sudo().create({
+                "cdr_id": _cdr_id.id,
                 "profile_index": _callflow.get("profile_index"),
                 "caller_profile_username": _caller_profile.get("username"),
                 "caller_profile_caller_id_name": _caller_profile.get("caller_id_name"),

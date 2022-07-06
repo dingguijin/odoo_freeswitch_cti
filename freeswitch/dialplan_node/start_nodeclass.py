@@ -10,10 +10,10 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-from abastract_nodeclass import AbstractNodeClass
+from .abstract_nodeclass import AbstractNodeClass
 
 class start_NodeClass(AbstractNodeClass):
 
-    def execute_node(self, event):
+    async def execute_node(self, event):
         self.return_result_event("SUCCESS")
         

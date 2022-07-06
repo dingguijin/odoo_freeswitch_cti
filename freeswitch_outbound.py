@@ -13,6 +13,7 @@ import logging
 import time
 import threading
 import urllib
+import uuid
 
 import odoo
 
@@ -30,6 +31,8 @@ class FreeSwitchOutbound():
 
         self.server = None
         self.streams = {}
+        self.stream_ids = 0
+        
         self.dialplans = {}
 
         self.event_queue = collections.deque([])
@@ -47,19 +50,17 @@ class FreeSwitchOutbound():
         while True:
             if self.is_stop:
                 break
-
             _event = self._get_node_event()
             if not _event:
                 await asyncio.sleep(1)
                 continue
-            
             await self._execute_node(_event)
             await asyncio.sleep(1)
         return
 
     async def _run_outbound_loop(self):
         self.server = await asyncio.start_server(self._client_connected_cb,
-                                                 host="0.0.0.0", port=9999,
+                                                 host="localhost", port=9999,
                                                  start_serving=False)
         async with self.server:
             try:
@@ -79,11 +80,10 @@ class FreeSwitchOutbound():
     def stop(self):
         asyncio.run(self._stop())
 
-    async def _client_connected_cb(reader, writer):
-        _logger.info("NEW 111111111111111111111111111111")
-        _uuid = str(uuid.uuid())
-        self.streams[_uuid] = OutboundStream(self, _uuid, reader, writer)
-        await self.streams[_uuid].start_stream()
+    async def _client_connected_cb(self, reader, writer):
+        self.streams[self.stream_ids] = OutboundStream(self, self.stream_ids, reader, writer)
+        await self.streams[self.stream_ids].start_stream()
+        self.stream_ids += 1
         return
 
     def _get_node_event(self):
@@ -91,23 +91,44 @@ class FreeSwitchOutbound():
             return None
         return self.event_queue.popleft()
 
-    def _execute_node(self, event):
+    async def _execute_node(self, event):
+        _logger.info(">>>>>>>>>>>>>> execute_node <<<<<<<<<<<<< %s", event)
+
         if event.get("event") == None:
-            node_object = NodeFactory.build(event.get("node"))
-            node_object.execute_node(event)
+            node_object = NodeFactory.build(event)
+            await node_object.execute_node(event)
         else:
             next_node = self._find_next_node(event)
+            _logger.info("NEXT NODE >>>>>>>>>>>>>>>> %s" % next_node)
             if next_node:
                 event.get("stream").set_current_node(next_node)
                 event.update(node=next_node)
-                node_object = NodeFactory.build(next_node)
-                node_object.execute_node(event)
+                node_object = NodeFactory.build(event)
+                await node_object.execute_node(event)
         return
 
     def push_node_event(self, stream, node, event=None):
         self.event_queue.append({"event": event, "stream": stream, "node": node})
         return
-    
+
+    def _find_next_node(self, event):
+        _event = event.get("event")
+        _node = event.get("node")
+        if not _event or not _node:
+            return None
+        _next_node = None
+        with self.db_connection.cursor() as cr:
+            cr.execute("""
+            SELECT node.* 
+            FROM freeswitch_cti_dialplan_node AS node LEFT JOIN 
+            freeswitch_cti_dialplan_node_event as event ON
+            event.next_node=node.id WHERE
+            event.name='%s' AND event.node_id=%d AND event.extension_id=%d
+            LIMIT 1
+            """ % (_event, _node.get("id"), _node.get("extension_id")))
+            _next_node = cr.dictfetchone()
+        return _next_node
+
 class OutboundStream():
 
     def __init__(self, server, _uuid, reader, writer):
@@ -118,7 +139,7 @@ class OutboundStream():
         self.writer = writer
         self.db_connection = server.db_connection
 
-        self.extension_ids = ()
+        self.extension_ids = set()
         self.current_dialplan = None
         self.current_node = None
 
@@ -154,19 +175,28 @@ class OutboundStream():
             if _key == "Content-Length" and "Content-Length" in headers:
                 _key = "Content-Content-Length"
             headers[_key] = _value 
-
         # keep receive more headers
         if header != b"\n":
             return
-
         # keep receive more headers
         if self._is_meta_headers(headers):
             return
-        
-        # _logger.info("%s", headers)
+        _logger.info("%s", headers)
         await self._handle_headers(headers)
         self._tmp_headers = {}
         return
+
+    def _is_meta_headers(self, headers):
+        if self.status != "DIALPLAN":
+            return False
+        
+        if len(headers) != 2:
+            return False
+        if headers.get("Content-Type") != "text/event-plain":
+            return False
+        if not headers.get("Content-Length"):
+            return False        
+        return True
 
     async def _handle_headers(self, headers):
         if self.status == "NULL":
@@ -214,7 +244,7 @@ class OutboundStream():
         if not _dialplans:
             return None
         for _dialplan in _dialplans:
-            if dialplan.get("id") in self.extension_ids:
+            if _dialplan.get("id") in self.extension_ids:
                 continue
             if self._match_dialplan(_dialplan, headers):
                 self.extension_ids.add(_dialplan.get("id"))
@@ -256,8 +286,9 @@ class OutboundStream():
         _start_node = self._search_dialplan_start_node(dialplan)
         if not _start_node:
             return
+        _logger.info(">>>>>>>>>>>>>> start node <<<<<<<<<< %s" % _start_node)
         self.server.push_node_event(self, _start_node)
-        self.current_node = _start_node
+        self.set_current_node(_start_node)
         return
 
     def _search_dialplan_start_node(self, dialplan):
