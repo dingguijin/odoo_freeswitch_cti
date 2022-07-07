@@ -56,7 +56,6 @@ class FreeSwitchOutbound():
                 await asyncio.sleep(1)
                 continue
             await self._execute_node(_event)
-            await asyncio.sleep(1)
         return
 
     async def _run_outbound_loop(self):
@@ -218,6 +217,8 @@ class OutboundStream():
         return True
 
     async def _handle_headers(self, headers):
+        self._update_stream_variable(headers)
+
         if self.status == "NULL":
             _dialplan = self._hunt_dialplan(headers)
             if not _dialplan:
@@ -298,7 +299,6 @@ class OutboundStream():
         
     def _handle_event(self, headers):
         # convert freeswitch event to result event and push to server
-        self._update_stream_variable(headers)
         return
 
     def on_start_node(self):
@@ -323,9 +323,9 @@ class OutboundStream():
         #     return
         
         self.is_variable_parsed = True
-        self.DP_MATCH = []
         DP_MATCH = headers.get("variable_DP_MATCH")
         if DP_MATCH:
+            self.DP_MATCH = []
             groups = DP_MATCH.split("|:")
             if groups and len(groups) > 1:
                 groups.pop(0)
@@ -340,7 +340,6 @@ class OutboundStream():
         for _header in _headers.items():
             if _header[0].startswith("variable_"):
                 self.variables[_header[0][len("variable_"):]] = _header[1]
-        
         return
 
     def get_variable_value(self, variable):
