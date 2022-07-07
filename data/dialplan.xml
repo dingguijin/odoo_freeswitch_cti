@@ -6,7 +6,8 @@
     <field name="name">Test Dialplab Flow 1</field>
     <field name="profile">internal</field>
     <field name="context">default</field>
-    <field name="condition"></field>
+    <field name="condition_field">destination_number</field>
+    <field name="condition_expression">^[1-2][0-9]{3}$</field>
     <field name="is_active" eval="True"></field>
   </record>
     

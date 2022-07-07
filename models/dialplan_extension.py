@@ -20,7 +20,9 @@ class DialplanExtension(models.Model):
                                   ('public', 'Public')], 'Context')
 
     is_continue = fields.Boolean("Is Continue", default=False)
-    condition = fields.Char("Condition")
+
+    condition_field = fields.Char("Condition Field")
+    condition_expression = fields.Char("Condition Expression")
 
     # less is higher
     priority = fields.Integer("Priority", default=1)

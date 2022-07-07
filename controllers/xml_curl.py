@@ -1614,46 +1614,6 @@ class FreeSwitchXmlCurl(http.Controller):
             return True
         return False
 
-    def _internal_diaplan(self):
-        # extension 1000 - 1199
-        _template = """
-        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <document type="freeswitch/xml">
-        <section name="dialplan" description="Xml Curl Universal Dialplan">
-        
-        <context name="default">
-        <extension name="internal">
-        <condition field="destination_number" expression="^.*$">
-        <action application="socket" data="localhost:9999 async full" />
-        </condition>
-        </extension>        
-        </context>
-        </section>
-        </document>
-        """
-                                              
-        return _template
-
-    def _external_dialplan(self):
-        _template = """
-        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <document type="freeswitch/xml">
-        <section name="dialplan" description="Xml Curl Universal Dialplan">
-
-        <context name="public">
-        <extension name="exterbak">
-        <condition field="destination_number" expression="^.*$">
-        <action application="socket" data="localhost:9999 async full" />
-        </condition>
-        </extension>
-        </context>
-
-        </section>
-        </document>
-        """
-
-        return _template
-
     @http.route('/freeswitch_xml_curl/dialplan', type='http', auth='none', csrf=False)
     def dialplan(self, *args, **kwargs):
         _logger.info("DIALPLAN for [%s], [%s]" % (http.request.params["Caller-Caller-ID-Name"],
@@ -1667,13 +1627,18 @@ class FreeSwitchXmlCurl(http.Controller):
         if not self._is_section_name_matched("dialplan"):
             return _EMPTY_XML
 
-        if self._is_internal_dialplan():
-            return self._internal_diaplan()
-
-        if self._is_external_dialplan():
-            return self._external_dialplan()
+        # def _lower_underscore(item):
+        #     x, y = lower(item[0]), lower(item[1])
+        #     x = x.replace("-", "_")
+        #     x = x.replace("-", "_")
+        #     return x,y        
+        #_headers = dict(map(_lower_underscore, http.request.params.items()))
         
-        return _EMPTY_XML
+        _context = _headers.get("Caller-Context")
+        _dialplans = self._hunt_dialplan(_context)
+        if not _dialplans:
+            return _EMPTY_XML
+        return self._dialplans_xml(_dialplans, _context)
 
     @http.route('/freeswitch_xml_curl/directory', type='http', auth='none', csrf=False)
     def directory(self, *args, **kw):
@@ -1711,4 +1676,51 @@ class FreeSwitchXmlCurl(http.Controller):
 
         return _EMPTY_XML
 
+    def _hunt_dialplan(self, context):
+        profile = "internal"
+        if context == "public":
+            profile = "external"
+        _extensions = []
+        with self.db_connection.cursor() as cr:
+            cr.execute("""
+            SELECT * 
+            FROM freeswitch_cti_dialplan_extension
+            WHERE profile='%s' AND context='%s' AND is_active=true
+            ORDER BY priority ASC
+            """ % (profile, context))
+            _extensions = cr.dictfetchall()
+        return _extensions
+    
+    def _dialplans_xml(self, context, extensions):
+        _dialplan_template = """
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <document type="freeswitch/xml">
+        <section name="dialplan" description="Xml Curl Universal Dialplan">
 
+        <context name="{{context}}">
+        {{extensions}}
+        </context>
+
+        </section>
+        </document>
+        """
+
+        _extension_template = """
+        <extension name="{{name}}">
+        <condition field="{{condition_field}}" expression="{{condition_expression}}">
+        <action application="set" data="dialplan_extension_id={{id}}" />
+        <action application="socket" data="localhost:9999 async full" />
+        </condition>
+        </extension>
+        """
+
+        _xml = _dialplan_template.replace("{{context}}", context)
+        for _extension in extensions:
+            _extension_xml = _extension_template.replace("{{name}}", _extension.get("name"))
+            _extension_xml = _extension_xml.replace("{{condition_field}}", _extension.get("condition_field"))
+            _extension_xml = _extension_xml.replace("{{condition_expression}}", _extension.get("condition_expression"))
+            _extension_xml = _extension_xml.replace("{{id}}", _extension.get("id"))
+
+        _xml = _xml.replace("{{extensions}}", "\n".join(_extension_xmls))
+        return _xml
+    
