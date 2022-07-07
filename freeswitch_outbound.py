@@ -153,6 +153,10 @@ class OutboundStream():
         self._tmp_headers = {}
 
         self.is_closed = False
+
+        self.is_variable_parsed = False
+        self.variables = {}
+        self.DP_MATCH = []
         return
 
     async def start_stream(self):
@@ -257,50 +261,19 @@ class OutboundStream():
         return self._send_esl_execute("hangup", reason)
 
     def _hunt_dialplan(self, headers):
-        _profile = "internal"
-        _context = headers.get("Caller-Context") or "default"
-        _dialplans = self._search_dialplans(_profile, _context)
-        if not _dialplans:
+        _id = headers.get("variable_dialplan_extension_id")
+        if not _id:
+            _logger.error("No dialplan id variable")
             return None
-        for _dialplan in _dialplans:
-            if _dialplan.get("id") in self.extension_ids:
-                continue
-            if self._match_dialplan(_dialplan, headers):
-                self.extension_ids.add(_dialplan.get("id"))
-                return _dialplan
-        return None
-
-    def _search_dialplans(self, profile, context):
-        _extensions = []
+        _extension = None
         with self.db_connection.cursor() as cr:
             cr.execute("""
             SELECT * 
             FROM freeswitch_cti_dialplan_extension
-            WHERE profile='%s' AND context='%s' AND is_active=true
-            ORDER BY priority ASC
-            """ % (profile, context))
-            _extensions = cr.dictfetchall()
-        return _extensions
-    
-    def _match_dialplan(self, dialplan, headers):
-        _condition = dialplan.get("condition")
-        if not _condition:
-            return True
-        _condition = _condition.strip()
-        _logger.info("COndition ------------> %s" % _condition)
-        
-        # field="destination_number", expression="^*.$"
-        _pattern = "field=[\'\"](\w+)[\'\"]\sexpression=[\'\"](.*)[\'\"]"
-        _pattern = re.compile(_pattern)
-        _match = _pattern.match(_condition)
-        if not _match:
-            return False
-        if len(_match.groups()) != 2:
-            return False
-        _pattern = re.compile(_match.group(2))
-        if _pattern.match(headers.get(_match.group(1)) or ""):
-            return True
-        return False
+            WHERE id=%s
+            """ % _id)
+            _extension = cr.dictfetchone()
+        return _extension
 
     def _execute_dialplan(self, dialplan):
         _start_node = self._search_dialplan_start_node(dialplan)
@@ -325,15 +298,13 @@ class OutboundStream():
         
     def _handle_event(self, headers):
         # convert freeswitch event to result event and push to server
+        self._update_stream_variable(headers)
         return
 
     def on_start_node(self):
         return
     
     def on_stop_node(self):
-        # hunt dialplan again
-        if self.current_dialplan.get("is_continue"):
-            self.state = "NULL"
         return
 
     def set_current_node(self, node):
@@ -347,3 +318,38 @@ class OutboundStream():
         self.is_closed = True
         return
 
+    def _update_stream_variable(self, headers):
+        # if self.is_variable_parsed:
+        #     return
+        
+        self.is_variable_parsed = True
+        self.DP_MATCH = []
+        DP_MATCH = headers.get("variable_DP_MATCH")
+        if DP_MATCH:
+            groups = DP_MATCH.split("|:")
+            if groups and len(groups) > 1:
+                groups.pop(0)
+                for group in groups:
+                    self.DP_MATCH.append(group) 
+
+        def _lower_underscore(item):
+            x, y = str(item[0]).lower(), item[1]
+            x = x.replace("-", "_")
+            return x,y        
+        _headers = dict(map(_lower_underscore, headers.items()))
+        for _header in _headers.items():
+            if _header[0].startswith("variable_"):
+                self.variables[_header[0][len("variable_"):]] = _header[1]
+        
+        return
+
+    def get_variable_value(self, variable):
+        _logger.info("VARIABLE: %s -> " % variable)
+        for _var in self.variables.items():
+            variable = variable.replace("${%s}" % _var[0], _var[1])
+        i = 1
+        for DP_MATCH in self.DP_MATCH:
+            variable = variable.replace("$%d" % i, DP_MATCH)
+
+        _logger.info("VARIABLE: -> %s" % variable)
+        return variable

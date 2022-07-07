@@ -80,9 +80,10 @@ if records:
           <field name="id"/>
           <field name="name"/>
           <field name="type"/>
-          <field name="profile"/>
+          <field name="context"/>
           <field name="is_continue"/>
-          <field name="condition"/>
+          <field name="condition_field"/>
+          <field name="condition_expression"/>
           <field name="priority"/>
           <field name="is_active"/>
         </tree>
@@ -100,11 +101,13 @@ if records:
                 <field name="id"/>
                 <field name="name"/>
                 <field name="type"/>
-                <field name="profile"/>
+                <field name="context"/>
               </group>
               <group>
-                <field name="is_continue"/>
-                <field name="condition"/>
+                <field name="is_continue" />
+                <field name="condition_field" />
+                <field name="condition_expression" />
+                <field name="is_continue" />
                 <field name="priority"/>
                 <field name="is_active"/>
               </group>              

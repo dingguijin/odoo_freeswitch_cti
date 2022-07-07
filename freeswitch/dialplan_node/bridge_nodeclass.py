@@ -12,7 +12,7 @@ _logger = logging.getLogger(__name__)
 
 from .abstract_nodeclass import AbstractNodeClass
 
-class answer_NodeClass(AbstractNodeClass):
+class bridge_NodeClass(AbstractNodeClass):
 
     async def execute_node(self, event):
         _data = self.node_param.get("data")

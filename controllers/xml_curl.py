@@ -616,256 +616,6 @@ class FreeSwitchXmlCurl(http.Controller):
         <!-- <param name="conference-flags" value="livearray-sync"/> -->
         </profile>
         
-        <profile name="wideband">
-        <param name="domain" value="$${domain}"/>
-        <param name="rate" value="16000"/>
-        <param name="interval" value="20"/>
-        <param name="energy-level" value="100"/>
-        <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
-        <param name="muted-sound" value="conference/conf-muted.wav"/>
-        <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-        <param name="alone-sound" value="conference/conf-alone.wav"/>
-        <param name="moh-sound" value="$${hold_music}"/>
-        <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-        <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-        <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-        <param name="locked-sound" value="conference/conf-locked.wav"/>
-        <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-        <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-        <param name="pin-sound" value="conference/conf-pin.wav"/>
-        <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-        <param name="caller-id-name" value="$${outbound_caller_name}"/>
-        <param name="caller-id-number" value="$${outbound_caller_id}"/>
-        <param name="comfort-noise" value="true"/>
-        <!-- <param name="tts-engine" value="flite"/> -->
-        <!-- <param name="tts-voice" value="kal16"/> -->
-        </profile>
-        
-        <profile name="ultrawideband">
-        <param name="domain" value="$${domain}"/>
-        <param name="rate" value="32000"/>
-        <param name="interval" value="20"/>
-        <param name="energy-level" value="100"/>
-        <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
-        <param name="muted-sound" value="conference/conf-muted.wav"/>
-        <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-        <param name="alone-sound" value="conference/conf-alone.wav"/>
-      <param name="moh-sound" value="$${hold_music}"/>
-      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-      <param name="locked-sound" value="conference/conf-locked.wav"/>
-      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-      <param name="pin-sound" value="conference/conf-pin.wav"/>
-      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-      <param name="caller-id-name" value="$${outbound_caller_name}"/>
-      <param name="caller-id-number" value="$${outbound_caller_id}"/>
-      <param name="comfort-noise" value="true"/>
-
-      <!-- <param name="conference-flags" value="video-floor-only|rfc-4579|livearray-sync|auto-3d-position|transcode-video|minimize-video-encoding"/> -->
-
-      <!-- <param name="video-mode" value="mux"/> -->
-      <!-- <param name="video-layout-name" value="3x3"/> -->
-      <!-- <param name="video-layout-name" value="group:grid"/> -->
-      <!-- <param name="video-canvas-size" value="1280x720"/> -->
-      <!-- <param name="video-canvas-bgcolor" value="#333333"/> -->
-      <!-- <param name="video-layout-bgcolor" value="#000000"/> -->
-      <!-- <param name="video-codec-bandwidth" value="2mb"/> -->
-      <!-- <param name="video-fps" value="15"/> -->
-      <!-- <param name="video-auto-floor-msec" value="100"/> -->
-
-
-      <!-- <param name="tts-engine" value="flite"/> -->
-      <!-- <param name="tts-voice" value="kal16"/> -->
-    </profile>
-
-    <profile name="cdquality">
-      <param name="domain" value="$${domain}"/>
-      <param name="rate" value="48000"/>
-      <param name="interval" value="20"/>
-      <param name="energy-level" value="100"/>
-      <!-- <param name="sound-prefix" value="$${sound_prefix}"/> -->
-      <param name="muted-sound" value="conference/conf-muted.wav"/>
-      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-      <param name="alone-sound" value="conference/conf-alone.wav"/>
-      <param name="moh-sound" value="$${hold_music}"/>
-      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-      <param name="locked-sound" value="conference/conf-locked.wav"/>
-      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-      <param name="pin-sound" value="conference/conf-pin.wav"/>
-      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-      <param name="caller-id-name" value="$${outbound_caller_name}"/>
-      <param name="caller-id-number" value="$${outbound_caller_id}"/>
-      <param name="comfort-noise" value="true"/>
-
-      <!-- <param name="conference-flags" value="video-floor-only|rfc-4579|livearray-sync|auto-3d-position|minimize-video-encoding"/> -->
-
-      <!-- <param name="video-mode" value="mux"/> -->
-      <!-- <param name="video-layout-name" value="3x3"/> -->
-      <!-- <param name="video-layout-name" value="group:grid"/> -->
-      <!-- <param name="video-canvas-size" value="1920x1080"/> -->
-      <!-- <param name="video-canvas-bgcolor" value="#333333"/> -->
-      <!-- <param name="video-layout-bgcolor" value="#000000"/> -->
-      <!-- <param name="video-codec-bandwidth" value="2mb"/> -->
-      <!-- <param name="video-fps" value="15"/> -->
-
-    </profile>
-
-    <profile name="video-mcu-stereo">
-      <param name="domain" value="$${domain}"/>
-      <param name="rate" value="48000"/>
-      <param name="channels" value="2"/>
-      <param name="interval" value="20"/>
-      <param name="energy-level" value="200"/>
-      <!-- <param name="tts-engine" value="flite"/> -->
-      <!-- <param name="tts-voice" value="kal16"/> -->
-      <param name="muted-sound" value="conference/conf-muted.wav"/>
-      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-      <param name="alone-sound" value="conference/conf-alone.wav"/>
-      <param name="moh-sound" value="$${hold_music}"/>
-      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-      <param name="locked-sound" value="conference/conf-locked.wav"/>
-      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-      <param name="pin-sound" value="conference/conf-pin.wav"/>
-      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-      <param name="caller-id-name" value="$${outbound_caller_name}"/>
-      <param name="caller-id-number" value="$${outbound_caller_id}"/>
-      <param name="comfort-noise" value="false"/>
-      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
-      <param name="video-auto-floor-msec" value="1000"/>
-      <param name="video-mode" value="mux"/>
-      <param name="video-layout-name" value="3x3"/>
-      <param name="video-layout-name" value="group:grid"/>
-      <param name="video-canvas-size" value="1920x1080"/>
-      <param name="video-canvas-bgcolor" value="#333333"/>
-      <param name="video-layout-bgcolor" value="#000000"/>
-      <param name="video-codec-bandwidth" value="3mb"/>
-      <param name="video-fps" value="30"/>
-      <!-- <param name="video-codec-config-profile-name" value="conference"/> -->
-    </profile>
-
-    <profile name="video-mcu-stereo-720">
-      <param name="domain" value="$${domain}"/>
-      <param name="rate" value="48000"/>
-      <param name="channels" value="2"/>
-      <param name="interval" value="20"/>
-      <param name="energy-level" value="200"/>
-      <!-- <param name="tts-engine" value="flite"/> -->
-      <!-- <param name="tts-voice" value="kal16"/> -->
-      <param name="muted-sound" value="conference/conf-muted.wav"/>
-      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-      <param name="alone-sound" value="conference/conf-alone.wav"/>
-      <param name="moh-sound" value="$${hold_music}"/>
-      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-      <param name="locked-sound" value="conference/conf-locked.wav"/>
-      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-      <param name="pin-sound" value="conference/conf-pin.wav"/>
-      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-      <param name="caller-id-name" value="$${outbound_caller_name}"/>
-      <param name="caller-id-number" value="$${outbound_caller_id}"/>
-      <param name="comfort-noise" value="false"/>
-      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
-      <param name="video-auto-floor-msec" value="1000"/>
-      <param name="video-mode" value="mux"/>
-      <param name="video-layout-name" value="3x3"/>
-      <param name="video-layout-name" value="group:grid"/>
-      <param name="video-canvas-size" value="1280x720"/>
-      <param name="video-canvas-bgcolor" value="#333333"/>
-      <param name="video-layout-bgcolor" value="#000000"/>
-      <param name="video-codec-bandwidth" value="3mb"/>
-      <param name="video-fps" value="30"/>
-    </profile>
-
-    <profile name="video-mcu-stereo-480">
-      <param name="domain" value="$${domain}"/>
-      <param name="rate" value="48000"/>
-      <param name="channels" value="2"/>
-      <param name="interval" value="20"/>
-      <param name="energy-level" value="200"/>
-      <!-- <param name="tts-engine" value="flite"/> -->
-      <!-- <param name="tts-voice" value="kal16"/> -->
-      <param name="muted-sound" value="conference/conf-muted.wav"/>
-      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-      <param name="alone-sound" value="conference/conf-alone.wav"/>
-      <param name="moh-sound" value="$${hold_music}"/>
-      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-      <param name="locked-sound" value="conference/conf-locked.wav"/>
-      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-      <param name="pin-sound" value="conference/conf-pin.wav"/>
-      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-      <param name="caller-id-name" value="$${outbound_caller_name}"/>
-      <param name="caller-id-number" value="$${outbound_caller_id}"/>
-      <param name="comfort-noise" value="false"/>
-      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
-      <param name="video-auto-floor-msec" value="1000"/>
-      <param name="video-mode" value="mux"/>
-      <param name="video-layout-name" value="3x3"/>
-      <param name="video-layout-name" value="group:grid"/>
-      <param name="video-canvas-size" value="640x480"/>
-      <param name="video-canvas-bgcolor" value="#333333"/>
-      <param name="video-layout-bgcolor" value="#000000"/>
-      <param name="video-codec-bandwidth" value="3mb"/>
-      <param name="video-fps" value="30"/>
-    </profile>
-
-    <profile name="video-mcu-stereo-320">
-      <param name="domain" value="$${domain}"/>
-      <param name="rate" value="48000"/>
-      <param name="channels" value="2"/>
-      <param name="interval" value="20"/>
-      <param name="energy-level" value="200"/>
-      <!-- <param name="tts-engine" value="flite"/> -->
-      <!-- <param name="tts-voice" value="kal16"/> -->
-      <param name="muted-sound" value="conference/conf-muted.wav"/>
-      <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
-      <param name="alone-sound" value="conference/conf-alone.wav"/>
-      <param name="moh-sound" value="$${hold_music}"/>
-      <param name="enter-sound" value="tone_stream://%(200,0,500,600,700)"/>
-      <param name="exit-sound" value="tone_stream://%(500,0,300,200,100,50,25)"/>
-      <param name="kicked-sound" value="conference/conf-kicked.wav"/>
-      <param name="locked-sound" value="conference/conf-locked.wav"/>
-      <param name="is-locked-sound" value="conference/conf-is-locked.wav"/>
-      <param name="is-unlocked-sound" value="conference/conf-is-unlocked.wav"/>
-      <param name="pin-sound" value="conference/conf-pin.wav"/>
-      <param name="bad-pin-sound" value="conference/conf-bad-pin.wav"/>
-      <param name="caller-id-name" value="$${outbound_caller_name}"/>
-      <param name="caller-id-number" value="$${outbound_caller_id}"/>
-      <param name="comfort-noise" value="false"/>
-      <param name="conference-flags" value="livearray-json-status|json-events|video-floor-only|rfc-4579|livearray-sync|minimize-video-encoding|manage-inbound-video-bitrate|video-required-for-canvas|video-mute-exit-canvas|mute-detect"/>
-      <param name="video-auto-floor-msec" value="1000"/>
-      <param name="video-mode" value="mux"/>
-      <param name="video-layout-name" value="3x3"/>
-      <param name="video-layout-name" value="group:grid"/>
-      <param name="video-canvas-size" value="480x320"/>
-      <param name="video-canvas-bgcolor" value="#333333"/>
-      <param name="video-layout-bgcolor" value="#000000"/>
-      <param name="video-codec-bandwidth" value="3mb"/>
-      <param name="video-fps" value="30"/>
-    </profile>
-
-    <profile name="sla">
-      <param name="domain" value="$${domain}"/>
-      <param name="rate" value="16000"/>
-      <param name="interval" value="20"/>
-      <param name="caller-controls" value="none"/>
-      <param name="energy-level" value="200"/>
-      <param name="moh-sound" value="silence"/>
-        <param name="comfort-noise" value="true"/>
-        </profile>
-
         </profiles>
         """
         return _CONFIGURATION_XML_TEMPLATE % ("conference", "conference", _content)
@@ -1627,18 +1377,16 @@ class FreeSwitchXmlCurl(http.Controller):
         if not self._is_section_name_matched("dialplan"):
             return _EMPTY_XML
 
-        # def _lower_underscore(item):
-        #     x, y = lower(item[0]), lower(item[1])
-        #     x = x.replace("-", "_")
-        #     x = x.replace("-", "_")
-        #     return x,y        
-        #_headers = dict(map(_lower_underscore, http.request.params.items()))
-        
-        _context = _headers.get("Caller-Context")
+        def _lower_underscore(item):
+            x, y = str(item[0]).lower(), item[1]
+            x = x.replace("-", "_")
+            return x,y        
+        _headers = dict(map(_lower_underscore, http.request.params.items()))
+        _context = _headers.get("caller_context")
         _dialplans = self._hunt_dialplan(_context)
         if not _dialplans:
             return _EMPTY_XML
-        return self._dialplans_xml(_dialplans, _context)
+        return self._dialplans_xml(_context, _dialplans)
 
     @http.route('/freeswitch_xml_curl/directory', type='http', auth='none', csrf=False)
     def directory(self, *args, **kw):
@@ -1681,15 +1429,10 @@ class FreeSwitchXmlCurl(http.Controller):
         if context == "public":
             profile = "external"
         _extensions = []
-        with self.db_connection.cursor() as cr:
-            cr.execute("""
-            SELECT * 
-            FROM freeswitch_cti_dialplan_extension
-            WHERE profile='%s' AND context='%s' AND is_active=true
-            ORDER BY priority ASC
-            """ % (profile, context))
-            _extensions = cr.dictfetchall()
-        return _extensions
+        _model = http.request.env["freeswitch_cti.dialplan_extension"].sudo()
+        return _model.search([("profile", "=", profile),
+                              ("context", "=", context),
+                              ("is_active", "=", True)], order="priority ASC")
     
     def _dialplans_xml(self, context, extensions):
         _dialplan_template = """
@@ -1706,21 +1449,25 @@ class FreeSwitchXmlCurl(http.Controller):
         """
 
         _extension_template = """
-        <extension name="{{name}}">
+        <extension name="{{name}}" continue="{{continue}}">
         <condition field="{{condition_field}}" expression="{{condition_expression}}">
         <action application="set" data="dialplan_extension_id={{id}}" />
         <action application="socket" data="localhost:9999 async full" />
         </condition>
         </extension>
         """
-
         _xml = _dialplan_template.replace("{{context}}", context)
+        _extension_xmls = []
         for _extension in extensions:
-            _extension_xml = _extension_template.replace("{{name}}", _extension.get("name"))
-            _extension_xml = _extension_xml.replace("{{condition_field}}", _extension.get("condition_field"))
-            _extension_xml = _extension_xml.replace("{{condition_expression}}", _extension.get("condition_expression"))
-            _extension_xml = _extension_xml.replace("{{id}}", _extension.get("id"))
-
+            _continue = "false"
+            if _extension.is_continue:
+                _continue = "true"
+            _extension_xml = _extension_template.replace("{{name}}", _extension.name)
+            _extension_xml = _extension_xml.replace("{{continue}}", _continue)
+            _extension_xml = _extension_xml.replace("{{condition_field}}", _extension.condition_field)
+            _extension_xml = _extension_xml.replace("{{condition_expression}}", _extension.condition_expression)
+            _extension_xml = _extension_xml.replace("{{id}}", str(_extension.id))
+            _extension_xmls.append(_extension_xml)
         _xml = _xml.replace("{{extensions}}", "\n".join(_extension_xmls))
         return _xml
     

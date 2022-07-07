@@ -18,7 +18,9 @@ class AbstractNodeClass():
         self.node = event.get("node")
 
         self.node_param = self.node.get("node_param") or "{}"
+        self.node_param = self.stream.get_variable_value(self.node_param)
         self.node_param = json.loads(self.node_param)
+
         return
 
     async def execute_node(self, event):
