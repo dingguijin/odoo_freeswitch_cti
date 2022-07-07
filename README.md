@@ -2,7 +2,7 @@
 Odoo FreeSWITCH CTI run as a standalone process spawned by Odoo and connect FreeSWITCH inbound service.
 Based on Odoo and FreeSwitch, it provides a total Callcenter solution.
 
-![](https://github.com/dingguijin/odoo_freeswitch_cti/raw/main/doc/images/flow.png)
+![](https://github.com/dingguijin/odoo_freeswitch_cti/raw/main/doc/images/pbx.png)
 
 # Highlight Features
 
@@ -29,24 +29,56 @@ Based on Odoo and FreeSwitch, it provides a total Callcenter solution.
 
 # Install and Run
 
-## Install FreeSWITCH
-   * Download this repo
-   * Download FreeSWITCH repo
+> FreeSWITCH and Odoo must install in one Linux machine.
+
+## Install and config FreeSWITCH
+   > Assuming you know to how to build FreeSWITCH by yourself.
+   
+   * Download FreeSWITCH source from [Github](https://github.com/signalwire/freeswitch.git)
    * Configure FreeSWITCH
    * Build and Install FreeSWITCH
+   * [Modules](doc/freeswitch_module.md) must be included
+   * XML_CURL module [config](doc/freeswitch_xml_curl.md)
 
 ## Install Odoo
-   * Download Odoo repo
+
+   > Assuming you know Odoo and how to run it by yourself.
+   
+   * Download Odoo from [Github](https://github.com/odoo/odoo.git)
    * Configure Python environment
    * Install requirements
    * Add database user
 
 ## Run
-   * Run Odoo with this addon at first
-   * Config FreeSWITCH in Odoo side
-   * Config FreeSWITCH XML_CURL module in FreeSWITCH side
-   * Run FreeSWITCH
+
+> Assuming you know how to run Odoo with a customized addon path.
+
+   * Download this [repo](https://github.com/dingguijin/odoo_freeswitch_cti.git) into Odoo addons path.
+   
+   * Run Odoo with this addon at first.
+   * Run FreeSWITCH with XML_CURL module configed.
+
+## Install odoo_freeswitch_cti Odoo module
+
+   * Login to Odoo ---- https://localhost:8069 with admin/admin.
+   * Menu -> Apps -> odoo_freeswitch_cti install.
+
+## Config Dialplan
+
+   * Login to Odoo
+   * Menu -> Callcenter -> Callcenter Dialplan.
+   * In dialplan list view, create new dialplan.
+   * In dialplan form view, switch view to dialplan flow graph view.
+
+## Config Dialplan Flow Graph
+
+   * Every dialplan flow start from "Start Node" and end with "Exit Node".
+   * Start Node -> ... -> Exit Node.
+   * Every call into FreeSWITCH will be routed by dialplan flow.
+   * To match the special call, change dialplan condition field and condition expression.
+   * Every variable and application in dialplan flow graph is the same with FreeSwitch dialplan.
 
 
 Any question please drop me an email.
 Email: dingguijin@gmail.com
+Wechat: ding_guijin
